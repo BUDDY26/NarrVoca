@@ -17,8 +17,13 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
+.env
+.env.local
+.env*.local
 .env*
 env.prod.txt
+# parent-directory env file (NarrVoca/env — outside repo root but listed for safety)
+../.env
 
 # vercel
 .vercel
