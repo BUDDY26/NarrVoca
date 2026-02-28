@@ -60,22 +60,23 @@ export default function AboutPage() {
             <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">The Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { name: "Ruben Aleman", handle: "@BUDDY26" },
-                { name: "Silvia Osuna", handle: "@mozzarellastix" },
-                { name: "Andrea Garza", handle: "" },
+                { name: "Ruben Aleman", handle: "@BUDDY26", github: "https://github.com/BUDDY26" },
+                { name: "Silvia Osuna", handle: "@mozzarellastix", github: "https://github.com/mozzarellastix" },
+                { name: "Andrea Garza", handle: "@andreag02", github: "https://github.com/andreag02" },
               ].map((member) => (
-                <div
+                <a
                   key={member.name}
-                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-purple-100 dark:border-purple-800 text-center"
+                  href={member.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-purple-100 dark:border-purple-800 text-center hover:border-purple-400 dark:hover:border-purple-600 transition-colors block"
                 >
                   <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full mx-auto mb-2 flex items-center justify-center">
                     <VocoraMascot width={28} height={28} />
                   </div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100">{member.name}</p>
-                  {member.handle && (
-                    <p className="text-sm text-purple-500 dark:text-purple-400">{member.handle}</p>
-                  )}
-                </div>
+                  <p className="text-sm text-purple-500 dark:text-purple-400">{member.handle}</p>
+                </a>
               ))}
             </div>
           </section>
@@ -84,8 +85,9 @@ export default function AboutPage() {
             <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">Academic Context</h2>
             <p className="leading-relaxed">
               NarrVoca was developed as a capstone project for CSCI 6333 — Database Systems at the
-              University of Houston (Spring 2026). It extends the original Vocora language-learning
-              platform with a structured relational database layer for narrative-based learning.
+              University of Texas Rio Grande Valley (Spring 2026). It extends the original Vocora
+              language-learning platform with a structured relational database layer for narrative-based
+              learning.
             </p>
           </section>
         </div>

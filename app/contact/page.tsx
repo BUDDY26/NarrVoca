@@ -26,7 +26,7 @@ export default function ContactPage() {
             Have a question, found a bug, or want to share feedback? We&apos;d love to hear from you.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <a
               href="https://github.com/BUDDY26"
               target="_blank"
@@ -45,6 +45,16 @@ export default function ContactPage() {
             >
               <span className="font-semibold text-slate-800 dark:text-slate-100">Silvia Osuna</span>
               <span className="text-sm text-purple-500">@mozzarellastix on GitHub</span>
+            </a>
+
+            <a
+              href="https://github.com/andreag02"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col gap-1 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
+            >
+              <span className="font-semibold text-slate-800 dark:text-slate-100">Andrea Garza</span>
+              <span className="text-sm text-purple-500">@andreag02 on GitHub</span>
             </a>
           </div>
 
@@ -70,10 +80,10 @@ export default function ContactPage() {
             <p className="leading-relaxed">
               For general questions or academic inquiries about the project, email us at{" "}
               <a
-                href="mailto:narrvoca@uh.edu"
+                href="mailto:narrvoca@utrgv.edu"
                 className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 underline"
               >
-                narrvoca@uh.edu
+                narrvoca@utrgv.edu
               </a>
               .
             </p>

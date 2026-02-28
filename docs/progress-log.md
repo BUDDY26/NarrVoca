@@ -1,7 +1,7 @@
 # NarrVoca — Progress Log
 
 **Course:** CSCI 6333 — Database Systems
-**Team:** Ruben Aleman, Silvia Osuna, Andrea Garza
+**Team:** Ruben Aleman, Silvia Osuna, Andrea Garza (@andreag02)
 **AI Assistant:** Claude Code (claude-sonnet-4-6)
 **Log Started:** 2026-02-27
 

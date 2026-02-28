@@ -4,8 +4,8 @@
 
 NarrVoca is a full-stack language-learning web application that extends the original Vocora platform with an adaptive **Narrative Reader** — branching, multilingual short stories that grade written responses in real time with GPT-4o-mini, track vocabulary mastery via spaced repetition, and automatically sync learned words into the user's Vocora word list.
 
-> **Course:** CSCI 6333 — Database Systems, University of Houston, Spring 2026
-> **Team:** Ruben Aleman (@BUDDY26), Silvia Osuna (@mozzarellastix), Andrea Garza
+> **Course:** CSCI 6333 — Database Systems, University of Texas Rio Grande Valley, Spring 2026
+> **Team:** Ruben Aleman (@BUDDY26), Silvia Osuna (@mozzarellastix), Andrea Garza (@andreag02)
 > **Deployed:** [vocora.vercel.app](https://vocora.vercel.app)
 
 ---
@@ -253,4 +253,4 @@ Full documentation at [`docs/api-reference.md`](docs/api-reference.md).
 
 ## License
 
-Academic project — CSCI 6333, University of Houston, Spring 2026.
+Academic project — CSCI 6333, University of Texas Rio Grande Valley, Spring 2026.
