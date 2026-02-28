@@ -72,57 +72,107 @@
 
 ---
 
+## Session 3 — 2026-02-28
+
+### What Was Accomplished
+
+**Phase 3 — Frontend UI (COMPLETE ✓)**
+
+| File | Status |
+|---|---|
+| `app/(auth)/dashboard/narrative/page.tsx` | Created — full narrative reader page |
+| `hooks/narrvoca/useNarrativeReader.ts` | Created — hook driving all reader state |
+| `test/unit/narrvoca/useNarrativeReader.test.tsx` | Created — 18 tests, all passing |
+| `jest.config.js` | Updated — added `*.test.tsx` to testMatch |
+| `@testing-library/react`, `jest-environment-jsdom` | Installed for React hook testing |
+
+**Page views implemented:**
+- **Story list** — cards with difficulty badge, language badge, framer-motion hover animation
+- **Node reader** — animated slide-in per scene, progress bar, bilingual text (target + EN translation), checkpoint `<Textarea>` + Submit / non-checkpoint Continue button
+- **Completion screen** — checkmark icon, story title, "Choose another story" reset
+
+**Hook (`useNarrativeReader`) responsibilities:**
+- Auth guard on mount via `supabase.auth.getSession()` → redirect to `/login` if no session
+- Loads story list; `selectStory(id)` fetches `FullStory` and resets node state
+- `handleContinue()` → `update-progress` POST + `resolveBranch` navigation
+- `handleSubmit()` → `log-interaction` POST + `update-progress` POST + `resolveBranch` (accuracy_score = 0.8 placeholder for Phase 4)
+- `advanceToNode()` → sets `isComplete` if next node not found or `null`
+
+**Rebrand: Vocora → NarrVoca**
+- All 5 navbar/footer components updated
+- `app/layout.tsx` title + description updated
+- 9 lang files updated (`Dashboard.ts`, `welcome.ts`, `chatbox.ts`, `login.ts`, `signup.ts`, `wordLists.ts`, `underConstruction.ts`, `app-page.ts`)
+- Home page tagline updated in EN, ES, ZH to reflect narrative story-based learning
+- `VocoraMascot` component name preserved (internal code identifier, not user-visible)
+- Deprecated models replaced: `o1-mini-2024-09-12` → `gpt-4o-mini`, `gpt-3.5-turbo` → `gpt-4o-mini`
+
+**Test results:** 6 suites, **57/57 tests passing**
+
+**Notes / gotchas:**
+- `jest.config.js` `testMatch` must include `*.test.tsx` (not just `*.test.ts`) for React hook tests
+- `act()` console warnings in hook tests are expected React 18 behaviour — not failures
+- Set `mockResolveBranch` AFTER calling helper functions that internally set the mock (stale mock override bug)
+- `@jest-environment jsdom` docblock required on `.tsx` test files; node tests are unaffected
+- Branch: `feature/narrvoca-expansion`
+
+---
+
 ## Overall Status
 
 | Phase | Description | Status |
 |---|---|---|
 | Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
 | Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
-| Phase 3 | Frontend UI — narrative reader at `/dashboard/narrative` | **NOT STARTED** |
-| Phase 4 | Integration — auth guards, connect Vocora + NarrVoca vocab tables | **NOT STARTED** |
+| Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
+| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **NOT STARTED** |
 
 ---
 
-## START HERE — Next Session (Phase 3)
+## START HERE — Next Session (Phase 4)
 
-### Step-by-step for Phase 3
+Phase 4 connects everything: replaces the placeholder accuracy score with real LLM grading, adds proper server-side auth, and wires vocab mastery updates into the reader flow.
 
-Phase 3 builds the narrative reader UI at `app/(auth)/dashboard/narrative/page.tsx`.
-Do NOT touch the existing `story-generator/` page.
+### Step-by-step for Phase 4
 
-**Step 1 — Create the page scaffold**
-- File: `app/(auth)/dashboard/narrative/page.tsx`
-- Mark `'use client'` — needs hooks
-- Import `getFullStory` from `@/lib/narrvoca/queries`
-- Import `resolveBranch` from `@/lib/narrvoca/branching`
-- Use `supabase.auth.getUser()` client-side to get `uid`
+**Step 1 — Real LLM grading API route**
+- File: `src/pages/api/narrvoca/grade-response.ts`
+- `POST` body: `{ node_id, user_input, target_language }`
+- Fetch the node's prompt text from `node_text` (text_type = 'prompt') as grading context
+- Call OpenAI `gpt-4o-mini` with a structured grading prompt
+- Return `{ accuracy_score: number, feedback: string }` (score 0.0–1.0)
+- Tests first: `test/unit/narrvoca/api/grade-response.test.ts`
 
-**Step 2 — Story selection view**
-- On mount: call `getStories()` to list available stories
-- Show story cards (title, target_language, difficulty_level)
-- On select: load that story with `getFullStory(storyId)` and enter reader view
+**Step 2 — Wire grading into `handleSubmit`**
+- In `hooks/narrvoca/useNarrativeReader.ts`, replace the `accuracy_score = 0.8` placeholder
+- Call `POST /api/narrvoca/grade-response` before logging the interaction
+- Pass real `accuracy_score` and `llm_feedback` to `log-interaction`
+- Expose `feedback` state from the hook so the page can display it
 
-**Step 3 — Node reader view**
-- Display current node's text (`node.texts`) filtered to user's display language
-- Show bilingual toggle (en ↔ target language)
-- Checkpoint nodes: show a text input + submit button
-- Non-checkpoint nodes: show a "Continue" button
+**Step 3 — Show feedback in the reader UI**
+- After checkpoint submit: display the LLM feedback text below the node content
+- Style as an info card (purple-tinted, italic text)
+- Only show after submission, clear on node advance
 
-**Step 4 — Checkpoint interaction**
-- On submit: POST to `/api/narrvoca/log-interaction` with `{ uid, node_id, user_input, accuracy_score }`
-- For Phase 3, `accuracy_score` can be a placeholder (0.8) — real LLM grading in Phase 4
-- After logging: POST to `/api/narrvoca/update-progress` with `{ uid, node_id, status: 'completed', accuracy_score }`
-- Then: POST to `/api/narrvoca/update-mastery` for each vocab word in the node
-- Then: call `resolveBranch(node_id, accuracy_score)` to get next node
+**Step 4 — Vocab mastery updates after checkpoint**
+- In `handleSubmit`, after `update-progress`, fetch vocab for the current node via `getBranchingRules` + `node_vocabulary` join (or add `getNodeVocab(nodeId)` query helper)
+- For each vocab word: POST to `/api/narrvoca/update-mastery` with the real `accuracy_score`
+- Add `getNodeVocab(nodeId)` to `lib/narrvoca/queries.ts` + test
 
-**Step 5 — Navigation**
-- After resolving next node, update current node state
-- If no next node (end of story): show completion screen
+**Step 5 — Server-side auth validation**
+- Add auth check to all three narrvoca API routes (`log-interaction`, `update-progress`, `update-mastery`, `grade-response`)
+- Use Supabase server client: `createServerClient` from `@supabase/ssr` or validate the `Authorization` header
+- Return 401 if no valid session instead of trusting the `uid` from request body
 
-**Step 6 — Add nav link**
-- Add "Narrative" link to the dashboard sidebar/nav (find existing nav component)
+**Step 6 — Add "Narrative" nav link to dashboard**
+- Find the main dashboard page (`app/(auth)/dashboard/page.tsx`) nav tab row
+- Add a "Narrative Reader" tab/button linking to `/dashboard/narrative`
+- Do NOT restructure existing tabs — append only
 
-**Step 7 — Update this log and commit**
+**Step 7 — Run all tests, update this log, commit, open PR**
+```bash
+npm test
+```
+All 57+ tests must stay green before opening the PR from `feature/narrvoca-expansion` → `main`.
 
 ---
 
@@ -144,7 +194,7 @@ Do NOT touch the existing `story-generator/` page.
 | Frontend | Next.js 14 + TypeScript (App Router + Pages Router hybrid) |
 | Styling | Tailwind CSS + Radix UI (shadcn/ui) |
 | Backend / DB | Supabase (PostgreSQL) — client at `lib/supabase.ts` |
-| AI — Stories | OpenAI (`o1-mini-2024-09-12`) via `src/pages/api/generate-story.ts` |
+| AI — Stories | OpenAI (`gpt-4o-mini`) via `src/pages/api/generate-story.ts` |
 | AI — Other | Google Generative AI, Fireworks AI |
 | Auth | Supabase Auth (UUID `uid`) + NextAuth |
 | Testing | Cypress E2E (`test/cypress/`) — Jest unit tests added in Phase 2 |
@@ -191,8 +241,9 @@ src/pages/api/narrvoca/
   log-interaction.ts                    ← [Phase 2] POST: log to interaction_log
   update-progress.ts                    ← [Phase 2] POST: upsert user_node_progress
   update-mastery.ts                     ← [Phase 2] POST: upsert user_vocab_mastery
-app/(auth)/dashboard/narrative/         ← [Phase 3] New narrative reader page
-test/unit/narrvoca/                     ← [Phase 2] Jest unit tests
+hooks/narrvoca/useNarrativeReader.ts    ← [Phase 3] Hook driving all reader state
+app/(auth)/dashboard/narrative/         ← [Phase 3] Narrative reader page
+test/unit/narrvoca/                     ← [Phase 2+3] Jest unit tests (57 passing)
 supabase/migrations/                    ← SQL migration + seed files
 docs/progress-log.md                    ← This file
 ```
