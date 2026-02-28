@@ -31,6 +31,7 @@ export default function NarrativePage() {
     isCheckpoint,
     userInput,
     setUserInput,
+    feedback,
     isLoading,
     isSubmitting,
     isComplete,
@@ -263,6 +264,15 @@ export default function NarrativePage() {
                     >
                       {isSubmitting ? 'Checking…' : 'Submit response'}
                     </Button>
+
+                    {/* LLM feedback card — shown after submission, cleared on advance */}
+                    {feedback && (
+                      <div className="rounded-lg bg-purple-50 border border-purple-200 dark:bg-purple-950 dark:border-purple-700 px-4 py-3">
+                        <p className="text-sm italic text-purple-700 dark:text-purple-300">
+                          {feedback}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

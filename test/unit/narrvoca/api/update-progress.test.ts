@@ -7,10 +7,12 @@ import handler from '@/src/pages/api/narrvoca/update-progress';
 const mockUpsert = jest.fn();
 const mockSelect = jest.fn();
 const mockSingle = jest.fn();
+const mockGetUser = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
     from: () => ({ upsert: mockUpsert }),
+    auth: { getUser: (...args) => mockGetUser(...args) },
   },
 }));
 
@@ -20,8 +22,12 @@ function setupChain(data: unknown, error: unknown = null) {
   mockUpsert.mockReturnValue({ select: mockSelect });
 }
 
-function makeReq(method: string, body?: object): Partial<NextApiRequest> {
-  return { method, body };
+function makeReq(method: string, body?: object, withAuth = true): Partial<NextApiRequest> {
+  return {
+    method,
+    body,
+    headers: withAuth ? { authorization: 'Bearer test-token' } : {},
+  };
 }
 
 function makeRes() {
@@ -31,7 +37,10 @@ function makeRes() {
   } as unknown as NextApiResponse;
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGetUser.mockResolvedValue({ data: { user: { id: 'test-uid' } } });
+});
 
 // ---------------------------------------------------------------------------
 
@@ -50,6 +59,13 @@ describe('POST /api/narrvoca/update-progress', () => {
     best_score: 0.85,
     completed_at: '2026-02-27T00:00:00Z',
   };
+
+  it('returns 401 when no authorization token is provided', async () => {
+    const req = makeReq('POST', validBody, false);
+    const res = makeRes();
+    await handler(req as NextApiRequest, res as NextApiResponse);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
 
   it('returns 200 with progress row on success', async () => {
     setupChain(dbRow);
@@ -77,7 +93,7 @@ describe('POST /api/narrvoca/update-progress', () => {
   });
 
   it('returns 405 for non-POST methods', async () => {
-    const req = makeReq('GET');
+    const req = makeReq('GET', undefined, false);
     const res = makeRes();
     await handler(req as NextApiRequest, res as NextApiResponse);
     expect(res.status).toHaveBeenCalledWith(405);

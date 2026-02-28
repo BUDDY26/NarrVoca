@@ -5,6 +5,7 @@ import {
   getNodeText,
   getFullStory,
   getBranchingRules,
+  getNodeVocab,
 } from '@/lib/narrvoca/queries';
 
 // ---------------------------------------------------------------------------
@@ -124,6 +125,22 @@ describe('getBranchingRules', () => {
   it('throws on DB error', async () => {
     mockResolve(null, { message: 'err' });
     await expect(getBranchingRules(1)).rejects.toThrow('err');
+  });
+});
+
+describe('getNodeVocab', () => {
+  it('returns node_vocabulary rows for a node', async () => {
+    const vocab = [{ node_id: 1, vocab_id: 5, is_target: true }];
+    mockResolve(vocab);
+    const result = await getNodeVocab(1);
+    expect(result).toEqual(vocab);
+    expect(chainMock.from).toHaveBeenCalledWith('node_vocabulary');
+    expect(chainMock.eq).toHaveBeenCalledWith('node_id', 1);
+  });
+
+  it('throws on DB error', async () => {
+    mockResolve(null, { message: 'err' });
+    await expect(getNodeVocab(1)).rejects.toThrow('err');
   });
 });
 

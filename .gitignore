@@ -32,3 +32,12 @@ cypress.config.ts
 
 # claude code local settings
 .claude/
+
+# OS artefacts
+.DS_Store
+
+# Python virtualenv
+.venv/
+
+# Private keys
+*.pem

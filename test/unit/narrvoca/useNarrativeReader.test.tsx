@@ -21,6 +21,7 @@ jest.mock('@/lib/supabase', () => ({
 jest.mock('@/lib/narrvoca/queries', () => ({
   getStories: jest.fn(),
   getFullStory: jest.fn(),
+  getNodeVocab: jest.fn(),
 }));
 
 jest.mock('@/lib/narrvoca/branching', () => ({
@@ -28,18 +29,19 @@ jest.mock('@/lib/narrvoca/branching', () => ({
 }));
 
 import { supabase } from '@/lib/supabase';
-import { getStories, getFullStory } from '@/lib/narrvoca/queries';
+import { getStories, getFullStory, getNodeVocab } from '@/lib/narrvoca/queries';
 import { resolveBranch } from '@/lib/narrvoca/branching';
 
 const mockGetSession = supabase.auth.getSession as jest.Mock;
 const mockGetStories = getStories as jest.Mock;
 const mockGetFullStory = getFullStory as jest.Mock;
+const mockGetNodeVocab = getNodeVocab as jest.Mock;
 const mockResolveBranch = resolveBranch as jest.Mock;
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
-const SESSION = { user: { id: 'uid-123' } };
+const SESSION = { user: { id: 'uid-123' }, access_token: 'test-access-token' };
 
 const STORIES = [
   { story_id: 1, title: 'En el Mercado', target_language: 'es', difficulty_level: 'beginner', genre: null, created_at: '' },
@@ -61,10 +63,11 @@ beforeEach(() => {
   mockGetSession.mockResolvedValue({ data: { session: SESSION } });
   mockGetStories.mockResolvedValue(STORIES);
   mockGetFullStory.mockResolvedValue(FULL_STORY);
+  mockGetNodeVocab.mockResolvedValue([]);
   mockResolveBranch.mockResolvedValue(11);
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
-    json: () => Promise.resolve({}),
+    json: () => Promise.resolve({ accuracy_score: 0.8, feedback: 'Good work!' }),
   });
 });
 
@@ -232,6 +235,48 @@ describe('handleSubmit', () => {
     const callsBefore = (global.fetch as jest.Mock).mock.calls.length;
     await act(async () => { await result.current.handleSubmit(); });
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(callsBefore);
+  });
+
+  it('calls grade-response API before logging the interaction', async () => {
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    const calls = (global.fetch as jest.Mock).mock.calls.map((c: unknown[]) => c[0]);
+    const gradeIdx = calls.findIndex((url: unknown) => url === '/api/narrvoca/grade-response');
+    const logIdx = calls.findIndex((url: unknown) => url === '/api/narrvoca/log-interaction');
+    expect(gradeIdx).toBeGreaterThanOrEqual(0);
+    expect(gradeIdx).toBeLessThan(logIdx);
+  });
+
+  it('exposes feedback from the LLM response', async () => {
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    expect(result.current.feedback).toBe('Good work!');
+  });
+
+  it('clears feedback when advancing to the next node', async () => {
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    expect(result.current.feedback).toBe('Good work!');
+    // Now advance past this checkpoint node
+    mockResolveBranch.mockResolvedValue(null);
+    await act(async () => { await result.current.handleContinue(); });
+    expect(result.current.feedback).toBeNull();
+  });
+
+  it('calls update-mastery for each vocab word associated with the node', async () => {
+    mockGetNodeVocab.mockResolvedValue([
+      { node_id: 11, vocab_id: 5, is_target: true },
+      { node_id: 11, vocab_id: 6, is_target: false },
+    ]);
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    const masteryCallUrls = (global.fetch as jest.Mock).mock.calls
+      .filter((c: unknown[]) => c[0] === '/api/narrvoca/update-mastery');
+    expect(masteryCallUrls).toHaveLength(2);
   });
 });
 

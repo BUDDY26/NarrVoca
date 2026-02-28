@@ -4,6 +4,7 @@ import type {
   StoryNode,
   NodeText,
   BranchingLogic,
+  NodeVocabulary,
   FullStory,
 } from '@/lib/narrvoca/types';
 
@@ -50,6 +51,15 @@ export async function getBranchingRules(nodeId: number): Promise<BranchingLogic[
     .eq('node_id', nodeId);
   if (error) throw new Error(error.message);
   return data as BranchingLogic[];
+}
+
+export async function getNodeVocab(nodeId: number): Promise<NodeVocabulary[]> {
+  const { data, error } = await supabase
+    .from('node_vocabulary')
+    .select('*')
+    .eq('node_id', nodeId);
+  if (error) throw new Error(error.message);
+  return data as NodeVocabulary[];
 }
 
 export async function getFullStory(storyId: number): Promise<FullStory> {

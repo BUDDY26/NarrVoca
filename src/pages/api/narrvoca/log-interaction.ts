@@ -1,9 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/lib/supabase';
 
+async function getAuthUser(req: NextApiRequest) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return null;
+  const { data: { user } } = await supabase.auth.getUser(token);
+  return user ?? null;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const user = await getAuthUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const { uid, node_id, user_input, llm_feedback, accuracy_score } = req.body ?? {};

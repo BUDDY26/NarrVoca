@@ -7,10 +7,12 @@ import handler from '@/src/pages/api/narrvoca/update-mastery';
 const mockUpsert = jest.fn();
 const mockSelect = jest.fn();
 const mockSingle = jest.fn();
+const mockGetUser = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
     from: () => ({ upsert: mockUpsert }),
+    auth: { getUser: (...args) => mockGetUser(...args) },
   },
 }));
 
@@ -20,8 +22,12 @@ function setupChain(data: unknown, error: unknown = null) {
   mockUpsert.mockReturnValue({ select: mockSelect });
 }
 
-function makeReq(method: string, body?: object): Partial<NextApiRequest> {
-  return { method, body };
+function makeReq(method: string, body?: object, withAuth = true): Partial<NextApiRequest> {
+  return {
+    method,
+    body,
+    headers: withAuth ? { authorization: 'Bearer test-token' } : {},
+  };
 }
 
 function makeRes() {
@@ -31,7 +37,10 @@ function makeRes() {
   } as unknown as NextApiResponse;
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGetUser.mockResolvedValue({ data: { user: { id: 'test-uid' } } });
+});
 
 // ---------------------------------------------------------------------------
 // next_review_at interval rules:
@@ -42,8 +51,15 @@ beforeEach(() => jest.clearAllMocks());
 // ---------------------------------------------------------------------------
 
 describe('POST /api/narrvoca/update-mastery', () => {
+  it('returns 401 when no authorization token is provided', async () => {
+    const req = makeReq('POST', { uid: 'u', vocab_id: 1, mastery_score: 0.5 }, false);
+    const res = makeRes();
+    await handler(req as NextApiRequest, res as NextApiResponse);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
   it('returns 405 for non-POST methods', async () => {
-    const req = makeReq('GET');
+    const req = makeReq('GET', undefined, false);
     const res = makeRes();
     await handler(req as NextApiRequest, res as NextApiResponse);
     expect(res.status).toHaveBeenCalledWith(405);
@@ -80,8 +96,6 @@ describe('POST /api/narrvoca/update-mastery', () => {
   });
 
   describe('next_review_at intervals', () => {
-    // We intercept the upsert payload to check the next_review_at value
-    // by inspecting what was passed to mockUpsert.
     function getUpsertPayload() {
       return mockUpsert.mock.calls[0][0] as Record<string, unknown>;
     }
@@ -90,12 +104,6 @@ describe('POST /api/narrvoca/update-mastery', () => {
       const dbRow = { uid: 'u', vocab_id: 1, mastery_score: 0, next_review_at: 'x' };
       setupChain(dbRow);
     });
-
-    function daysFromNow(days: number): Date {
-      const d = new Date();
-      d.setDate(d.getDate() + days);
-      return d;
-    }
 
     async function run(score: number) {
       const req = makeReq('POST', { uid: 'u', vocab_id: 1, mastery_score: score });

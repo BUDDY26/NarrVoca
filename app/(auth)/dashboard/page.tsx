@@ -2,7 +2,7 @@
 import {Suspense, useState, useEffect} from "react";
 import {useLanguage} from "@/lang/LanguageContext";
 import {supabase} from "@/lib/supabase";
-import {Bookmark, Lightbulb, List, MessageSquare, Mic, Sparkles, X, Plus, ChevronDown} from "lucide-react"
+import {BookOpen, Bookmark, Lightbulb, List, MessageSquare, Mic, Sparkles, X, Plus, ChevronDown} from "lucide-react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
@@ -254,11 +254,11 @@ function DashboardPage() {
                         <MessageSquare className="h-4 w-4 mr-2" />
                         {translated.writing}
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className={`${
-                          showSaved 
-                            ? "bg-purple-500 hover:bg-purple-600 text-white" 
+                          showSaved
+                            ? "bg-purple-500 hover:bg-purple-600 text-white"
                             : "bg-white hover:bg-gray-100 text-black border-2 border-purple-200"
                         } shadow-md`}
                         onClick={() => {
@@ -270,6 +270,14 @@ function DashboardPage() {
                       >
                         <Bookmark className="h-4 w-4 mr-2" />
                         {translated.extras.option2}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-white hover:bg-gray-100 text-black border-2 border-purple-200 shadow-md"
+                        onClick={() => router.push('/dashboard/narrative')}
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Narrative Reader
                       </Button>
                     </div>
                   </div>

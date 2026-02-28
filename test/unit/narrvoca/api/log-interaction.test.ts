@@ -7,12 +7,12 @@ import handler from '@/src/pages/api/narrvoca/log-interaction';
 const mockInsert = jest.fn();
 const mockSelect = jest.fn();
 const mockSingle = jest.fn();
+const mockGetUser = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
-    from: () => ({
-      insert: mockInsert,
-    }),
+    from: () => ({ insert: mockInsert }),
+    auth: { getUser: (...args) => mockGetUser(...args) },
   },
 }));
 
@@ -26,19 +26,25 @@ function setupChain(data: unknown, error: unknown = null) {
 // ---------------------------------------------------------------------------
 // Request / Response helpers
 // ---------------------------------------------------------------------------
-function makeReq(method: string, body?: object): Partial<NextApiRequest> {
-  return { method, body };
+function makeReq(method: string, body?: object, withAuth = true): Partial<NextApiRequest> {
+  return {
+    method,
+    body,
+    headers: withAuth ? { authorization: 'Bearer test-token' } : {},
+  };
 }
 
 function makeRes() {
-  const res = {
+  return {
     status: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),
   } as unknown as NextApiResponse;
-  return res;
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockGetUser.mockResolvedValue({ data: { user: { id: 'test-uid' } } });
+});
 
 // ---------------------------------------------------------------------------
 
@@ -49,6 +55,13 @@ describe('POST /api/narrvoca/log-interaction', () => {
     user_input: 'Hola',
     accuracy_score: 0.9,
   };
+
+  it('returns 401 when no authorization token is provided', async () => {
+    const req = makeReq('POST', validBody, false);
+    const res = makeRes();
+    await handler(req as NextApiRequest, res as NextApiResponse);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
 
   it('returns 201 with interaction_id on success', async () => {
     setupChain({ interaction_id: 42 });
@@ -75,7 +88,7 @@ describe('POST /api/narrvoca/log-interaction', () => {
   });
 
   it('returns 405 for non-POST methods', async () => {
-    const req = makeReq('GET');
+    const req = makeReq('GET', undefined, false);
     const res = makeRes();
     await handler(req as NextApiRequest, res as NextApiResponse);
     expect(res.status).toHaveBeenCalledWith(405);

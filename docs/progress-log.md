@@ -124,11 +124,47 @@
 | Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
 | Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
 | Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
-| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **NOT STARTED** |
+| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **COMPLETE ✓** |
 
 ---
 
-## START HERE — Next Session (Phase 4)
+---
+
+## Session 4 — 2026-02-28
+
+### What Was Accomplished
+
+**`.gitignore` / Security (pre-Phase 4)**
+- Added `.DS_Store`, `.venv/`, `*.pem` to `.gitignore`
+- Removed 3 tracked `.DS_Store` files from git index (`git rm --cached`)
+- Confirmed `.env*` already covered all env file patterns
+
+**Phase 4 — Integration (COMPLETE ✓)**
+
+| File | Status |
+|---|---|
+| `src/pages/api/narrvoca/grade-response.ts` | Created — POST, fetches prompt context from `node_text`, calls `gpt-4o-mini` with `response_format: json_object`, returns `{ accuracy_score, feedback }` |
+| `test/unit/narrvoca/api/grade-response.test.ts` | Created — 8 tests, all passing |
+| `lib/narrvoca/queries.ts` | Added `getNodeVocab(nodeId)` helper |
+| `test/unit/narrvoca/queries.test.ts` | Added 2 tests for `getNodeVocab` |
+| `hooks/narrvoca/useNarrativeReader.ts` | Replaced `accuracy_score = 0.8` placeholder with real grading flow; added `accessToken` state; sends `Authorization: Bearer` header on all narrvoca API calls; calls `getNodeVocab` + `update-mastery` per word after checkpoint submit; exposes `feedback` state |
+| `app/(auth)/dashboard/narrative/page.tsx` | Displays LLM feedback in a purple-tinted italic card after checkpoint submission; clears when user continues |
+| `src/pages/api/narrvoca/log-interaction.ts` | Added `getAuthUser` — validates `Authorization` header via `supabase.auth.getUser`; returns 401 if no session |
+| `src/pages/api/narrvoca/update-progress.ts` | Same auth guard added |
+| `src/pages/api/narrvoca/update-mastery.ts` | Same auth guard added |
+| `app/(auth)/dashboard/page.tsx` | Added "Narrative Reader" tab button (uses `router.push('/dashboard/narrative')`); added `BookOpen` to lucide imports |
+
+**Test results:** 7 suites, **75/75 tests passing**
+
+**Notes / gotchas:**
+- `jest.mock` factory is hoisted — referencing `const mockX` directly inside the factory object literal hits the TDZ. Wrap it in a lambda (`(...args) => mockX(...args)`) so the reference is deferred until the mock is called
+- `advanceToNode` must NOT clear `feedback` — clear it at the top of `handleContinue` and `handleSubmit` instead, so the feedback state persists long enough for tests (and the UI) to observe it after `handleSubmit` resolves
+- `act()` warnings in hook tests are expected React 18 behaviour (pre-existing) — not failures
+- Branch: `feature/narrvoca-expansion`
+
+---
+
+## START HERE — Next Session (Phase 4 is done)
 
 Phase 4 connects everything: replaces the placeholder accuracy score with real LLM grading, adds proper server-side auth, and wires vocab mastery updates into the reader flow.
 
