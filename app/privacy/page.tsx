@@ -83,13 +83,13 @@ export default function PrivacyPage() {
               5. Contact
             </h2>
             <p className="leading-relaxed">
-              For privacy-related inquiries, please contact us at{" "}
-              <a
-                href="mailto:privacy@narrvoca.app"
+              For privacy-related inquiries, please use our{" "}
+              <Link
+                href="/contact"
                 className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 underline"
               >
-                privacy@narrvoca.app
-              </a>
+                contact form
+              </Link>
               .
             </p>
           </section>
