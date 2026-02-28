@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Generate the story in the practice language
     const completion = await openai.chat.completions.create({
-      model: "o1-mini-2024-09-12",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Get the translation in the user's language
     const translationCompletion = await openai.chat.completions.create({
-      model: "o1-mini-2024-09-12",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
