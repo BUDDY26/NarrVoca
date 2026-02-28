@@ -18,31 +18,31 @@ export default function Footer() {
                     <VocoraMascot width={24} height={24} />
                     </div>
                     <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-violet-500 bg-clip-text text-transparent">
-                    Vocora
+                    NarrVoca
                     </span>
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-0">
                     <Link
-                    href="#"
+                    href="/about"
                     className="text-slate-600 hover:text-purple-600 transition-colors dark:text-slate-300 dark:hover:text-purple-400"
                     >
                     {translated.about}
                     </Link>
                     <Link
-                    href="#"
+                    href="/privacy"
                     className="text-slate-600 hover:text-purple-600 transition-colors dark:text-slate-300 dark:hover:text-purple-400"
                     >
                     {translated.privacy}
                     </Link>
                     <Link
-                    href="#"
+                    href="/terms"
                     className="text-slate-600 hover:text-purple-600 transition-colors dark:text-slate-300 dark:hover:text-purple-400"
                     >
                     {translated.terms}
                     </Link>
                     <Link
-                    href="#"
+                    href="/contact"
                     className="text-slate-600 hover:text-purple-600 transition-colors dark:text-slate-300 dark:hover:text-purple-400"
                     >
                     {translated.contact}

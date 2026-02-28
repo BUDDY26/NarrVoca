@@ -2,8 +2,8 @@
 
 const homeTranslations = {
     en: {
-      heading: "Language Reinforcement with AI",
-      description: "Using cutting-edge AI technology to help push your language learning journey to the next level.",
+      heading: "Learn Languages Through Interactive Stories",
+      description: "Immerse yourself in narrative adventures that adapt to your level. Read, respond, and master a new language one story at a time.",
       buttonText: "Let's Get Started",
       buttonText2: "Learn More",
       feature1: "Generated Stories",
@@ -16,8 +16,8 @@ const homeTranslations = {
       signUp: "Sign Up for Free"
     },
     es: {
-      heading: "Refuerzo del idioma con IA",
-      description: "Usando tecnología de IA de vanguardia para ayudar a impulsar tu viaje de aprendizaje de idiomas al siguiente nivel.",
+      heading: "Aprende idiomas a través de historias interactivas",
+      description: "Sumérgete en aventuras narrativas adaptadas a tu nivel. Lee, responde y domina un nuevo idioma historia por historia.",
       buttonText: "Empecemos",
       buttonText2: "Aprender más",
       feature1: "Historias Generadas",
@@ -30,8 +30,8 @@ const homeTranslations = {
       signUp: "Regístrate gratis"
     },
     zh: {
-      heading: "使用AI学习语言",
-      description: "利用最先进的人工智能技术，帮助您将语言学习之旅提升到新的水平。",
+      heading: "通过互动故事学习语言",
+      description: "沉浸在根据您的水平量身定制的叙事冒险中。逐篇阅读、回应，轻松掌握新语言。",
       buttonText: "让我们开始吧",
       buttonText2: "了解更多",
       feature1: "生成的故事",

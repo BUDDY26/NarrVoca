@@ -7,7 +7,7 @@ const underConstruction = {
         description: "Check back soon!",
         return: "Return to Dashboard",
         return2: "Back to Dashboard",
-        footerText: "Built with ❤️ by Vocora - 2025",
+        footerText: "Built with ❤️ by NarrVoca - 2025",
 
         account: {
             title: "Account Settings",
@@ -51,7 +51,7 @@ const underConstruction = {
         description: "¡Vuelve pronto!",
         return: "Volver al tablero",
         return2: "Regresar al tablero",
-        footerText: "Construido con ❤️ por Vocora - 2025",
+        footerText: "Construido con ❤️ por NarrVoca - 2025",
 
         account: {
             title: "Configuración de la cuenta",
@@ -94,7 +94,7 @@ const underConstruction = {
         description: "请稍后再来！",
         return: "返回仪表板",
         return2: "返回仪表板",
-        footerText: "由Vocora - 2025构建 ❤️",
+        footerText: "由NarrVoca - 2025构建 ❤️",
 
         account: {
             title: "帐户设置",

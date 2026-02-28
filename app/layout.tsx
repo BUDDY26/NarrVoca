@@ -7,8 +7,17 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Vocora",
-  description: "Created by Andrea, Teresa, Mariana, Perla",
+  title: "NarrVoca",
+  description: "Narrative-based language learning — master vocabulary through interactive stories.",
+  icons: {
+    icon: "/VocoraMascot.svg",
+    apple: "/VocoraMascot.svg",
+  },
+  openGraph: {
+    title: "NarrVoca",
+    description: "Narrative-based language learning — master vocabulary through interactive stories.",
+    images: [{ url: "/VocoraMascot.svg" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -18,7 +18,7 @@ const loginTranslations = {
       signupButton: "Sign up",
       unexpectedError: "An unexpected error occurred",
       continueOption: "Or continue with",
-      footerText: "Built with ❤️ by Vocora - 2025",
+      footerText: "Built with ❤️ by NarrVoca - 2025",
     },
     es: {
       title: "Iniciar sesión",
@@ -33,7 +33,7 @@ const loginTranslations = {
       signupButton: "Regístrate",
       unexpectedError: "Ocurrió un error inesperado",
       continueOption: "O continúa con",
-      footerText: "Construido con ❤️ por Vocora - 2025",
+      footerText: "Construido con ❤️ por NarrVoca - 2025",
     },
     zh: {
       title: "登录",
@@ -48,7 +48,7 @@ const loginTranslations = {
       signupButton: "注册",
       unexpectedError: "发生了意外错误",
       continueOption: "或继续使用",
-      footerText: "由Vocora - 2025 ❤️构建",
+      footerText: "由NarrVoca - 2025 ❤️构建",
     },
   } as const;
   

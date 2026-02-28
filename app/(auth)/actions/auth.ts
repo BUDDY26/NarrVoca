@@ -6,7 +6,6 @@ export async function signIn(formData: FormData) {
   const password = formData.get("password")
 
   // Here you would typically validate the credentials and sign in the user
-  console.log("Sign in attempt:", { email, password })
 
   // For now, we'll just return a success message
   return { success: true, message: "Sign in successful" }

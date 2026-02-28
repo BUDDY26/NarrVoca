@@ -2,7 +2,7 @@
 
 const welcomeTranslations = {
     en: {
-        title: "Welcome to Vocora",
+        title: "Welcome to NarrVoca",
         prompt: "Click on any of the buttons above to get started with your language learning journey!",
         guide: "Quick Start Guide",
         build: "Build your vocabulary with Word Lists",
@@ -15,7 +15,7 @@ const welcomeTranslations = {
         saveprac: "Save your favorite stories and practice materials",
     },
     es: {
-        title: "Bienvenido/a a Vocora!",
+        title: "Bienvenido/a a NarrVoca!",
         prompt: "Haz clic en cualquiera de los botones de arriba para comenzar tu viaje de aprendizaje de idiomas.",
         guide: "Guía de inicio rápido",
         build: "Amplía tu vocabulario con listas de palabras",
@@ -28,7 +28,7 @@ const welcomeTranslations = {
         saveprac: "Guarda tus historias y materiales de práctica favoritos",
     },
     zh: {
-        title: "欢迎来到 Vocora",
+        title: "欢迎来到 NarrVoca",
         prompt: "点击上方任意按钮，开始你的语言学习之旅吧！",
         guide: "快速入门指南",
         build: "通过词汇表扩展你的词汇量",

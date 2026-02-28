@@ -7,8 +7,8 @@ const wordLists = {
         add: "Add Words",
         delete: "Delete Words",
         success: "Success!",
-        successDescription: "Your account has been created successfully. You can now start learning with Vocora!",
-        footerText: "Built with ❤️ by Vocora - 2025",
+        successDescription: "Your account has been created successfully. You can now start learning with NarrVoca!",
+        footerText: "Built with ❤️ by NarrVoca - 2025",
         empty: "Your vocabulary list is empty",
     },
     es: {
@@ -17,8 +17,8 @@ const wordLists = {
         add: "Agregar palabras",
         delete: "Eliminar palabras",
         success: "¡Éxito!",
-        successDescription: "Tu cuenta ha sido creada con éxito. ¡Ahora puedes comenzar a aprender con Vocora!",
-        footerText: "Construido con ❤️ por Vocora - 2025",
+        successDescription: "Tu cuenta ha sido creada con éxito. ¡Ahora puedes comenzar a aprender con NarrVoca!",
+        footerText: "Construido con ❤️ por NarrVoca - 2025",
         empty: "Tu lista de vocabulario está vacía",
     },
     zh: {
@@ -27,8 +27,8 @@ const wordLists = {
         add: "添加单词",
         delete: "删除单词",
         success: "成功！",
-        successDescription: "您的帐户已成功创建。现在您可以开始使用Vocora学习！",
-        footerText: "由Vocora ❤️构建 - 2025",
+        successDescription: "您的帐户已成功创建。现在您可以开始使用NarrVoca学习！",
+        footerText: "由NarrVoca ❤️构建 - 2025",
         empty: "您的词汇列表是空的",
     },
   };

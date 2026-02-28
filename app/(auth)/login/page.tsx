@@ -70,7 +70,6 @@ export default function LoginPage() {
         }
       }
 
-      console.log("Authentication successful.", loginData);
       router.push(`/dashboard?lang=${language}`);
       // For right now : 
       // router.push(`/success`);

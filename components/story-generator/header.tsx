@@ -81,7 +81,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex-1 flex items-center">
           <Link href="/" className="text-2xl font-bold text-white">
-            Vocora
+            NarrVoca
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-end gap-4" ref={tabRef}>
