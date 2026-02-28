@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Vocora",
-  description: "Created by Andrea, Teresa, Mariana, Perla",
+  title: "NarrVoca",
+  description: "Narrative-based language learning — master vocabulary through interactive stories.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

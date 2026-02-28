@@ -16,7 +16,7 @@ const signupTranslations = {
       signUpButton: "Sign Up",
       signInLink: "Already have an account?",
       unexpectedError: "An unexpected error occurred",
-      footerText: "Built with ❤️ by Vocora - 2025",
+      footerText: "Built with ❤️ by NarrVoca - 2025",
       passwordTitle: "Password must include",
       passwordRequirements: [
         "At least 6 characters",
@@ -40,7 +40,7 @@ const signupTranslations = {
       signUpButton: "Regístrate",
       signInLink: "¿Ya tienes una cuenta?",
       unexpectedError: "Ocurrió un error inesperado",
-      footerText: "Construido con ❤️ por Vocora - 2025",
+      footerText: "Construido con ❤️ por NarrVoca - 2025",
       passwordTitle: "La contraseña debe incluir",
       passwordRequirements: [
         "Al menos 6 caracteres",
@@ -64,7 +64,7 @@ const signupTranslations = {
       continueOption: "或继续使用",
       signInLink: "已经有账户？",
       unexpectedError: "发生了意外错误",
-      footerText: "由 Vocora ❤️ 构建 - 2025",
+      footerText: "由 NarrVoca ❤️ 构建 - 2025",
       passwordTitle: "密码必须包括",
       passwordRequirements: [
         "至少 6 个字符",

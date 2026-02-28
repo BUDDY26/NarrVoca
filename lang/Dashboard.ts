@@ -76,7 +76,7 @@ const dashBoardTranslations = {
         },
 
         loading: "Loading...",
-        footerText: "Built with ❤️ by Vocora - 2025",
+        footerText: "Built with ❤️ by NarrVoca - 2025",
         deleteStory: "Delete Story",
     },
     es: {
@@ -155,7 +155,7 @@ const dashBoardTranslations = {
         },
 
         loading: "Cargando...",
-        footerText: "Construido con ❤️ por Vocora - 2025",
+        footerText: "Construido con ❤️ por NarrVoca - 2025",
         deleteStory: "Eliminar historia",
     },
     zh: {
@@ -233,7 +233,7 @@ const dashBoardTranslations = {
         },
 
         loading: "加载中...",
-        footerText: "由Vocora - 2025 ❤️构建",
+        footerText: "由NarrVoca - 2025 ❤️构建",
         deleteStory: "删除故事",
     },
   };

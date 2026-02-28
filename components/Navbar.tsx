@@ -17,7 +17,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-10 bg-gradient-to-r from-purple-600 to-violet-500 text-white">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold">
-          Vocora
+          NarrVoca
         </Link>
 
         {/* Desktop Navigation */}

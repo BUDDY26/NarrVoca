@@ -18,7 +18,7 @@ export default function Footer() {
                     <VocoraMascot width={24} height={24} />
                     </div>
                     <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-violet-500 bg-clip-text text-transparent">
-                    Vocora
+                    NarrVoca
                     </span>
                 </div>
 

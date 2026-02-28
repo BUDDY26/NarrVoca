@@ -21,7 +21,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2">
                     <div>
                         <Link href="/">
-                            <h1 className="text-2xl font-bold text-white">Vocora</h1>
+                            <h1 className="text-2xl font-bold text-white">NarrVoca</h1>
                         </Link>
                     </div>
                 </div>
