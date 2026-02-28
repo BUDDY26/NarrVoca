@@ -29,3 +29,6 @@ next-env.d.ts
 
 # cypress
 cypress.config.ts
+
+# claude code local settings
+.claude/
