@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 // 2. Create a new form — set the destination email to ruben.aleman@gmail.com
 // 3. Copy your Form ID (looks like "xpzgkqdb") and paste it below
 // 4. Deploy — submissions will be forwarded to your Gmail automatically
-const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORM_ID";
+const FORMSPREE_URL = "https://formspree.io/f/meeldwpg";
 // ─────────────────────────────────────────────────────────────────────────────
 
 type Status = "idle" | "submitting" | "success" | "error";
