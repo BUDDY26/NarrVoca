@@ -2,7 +2,7 @@
 
 **Branch:** `feature/narrvoca-expansion` → `main`
 **Course:** CSCI 6333 — Database Systems, UTRGV Spring 2026
-**Team:** Ruben Aleman (@BUDDY26), Silvia Osuna (@mozzarellastix), Andrea Garza (@andreag02)
+**Developer:** Ruben Aleman (@BUDDY26)
 
 ---
 
@@ -335,5 +335,3 @@ The Supabase migrations (`001_narrvoca_extension.sql`, `002_seed_sample_story.sq
 ## Reviewers
 
 - Ruben Aleman (@BUDDY26)
-- Silvia Osuna (@mozzarellastix)
-- Andrea Garza (@andreag02)

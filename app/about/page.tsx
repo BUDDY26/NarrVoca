@@ -57,28 +57,21 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">The Team</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { name: "Ruben Aleman", handle: "@BUDDY26", github: "https://github.com/BUDDY26" },
-                { name: "Silvia Osuna", handle: "@mozzarellastix", github: "https://github.com/mozzarellastix" },
-                { name: "Andrea Garza", handle: "@andreag02", github: "https://github.com/andreag02" },
-              ].map((member) => (
-                <a
-                  key={member.name}
-                  href={member.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-purple-100 dark:border-purple-800 text-center hover:border-purple-400 dark:hover:border-purple-600 transition-colors block"
-                >
-                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full mx-auto mb-2 flex items-center justify-center">
-                    <VocoraMascot width={28} height={28} />
-                  </div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-100">{member.name}</p>
-                  <p className="text-sm text-purple-500 dark:text-purple-400">{member.handle}</p>
-                </a>
-              ))}
-            </div>
+            <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">Developer</h2>
+            <a
+              href="https://github.com/BUDDY26"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
+            >
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                <VocoraMascot width={32} height={32} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-slate-100">Ruben Aleman</p>
+                <p className="text-sm text-purple-500 dark:text-purple-400">@BUDDY26 on GitHub</p>
+              </div>
+            </a>
           </section>
 
           <section>

@@ -61,46 +61,24 @@ export default function ContactPage() {
 
         <div className="space-y-8 text-slate-700 dark:text-slate-300">
           <p className="text-lg leading-relaxed">
-            Have a question, found a bug, or want to share feedback? We&apos;d love to hear from you.
+            Have a question, found a bug, or want to share feedback? I&apos;d love to hear from you.
           </p>
 
-          {/* Team GitHub cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <a
-              href="https://github.com/BUDDY26"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col gap-1 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
-            >
-              <span className="font-semibold text-slate-800 dark:text-slate-100">Ruben Aleman</span>
-              <span className="text-sm text-purple-500">@BUDDY26 on GitHub</span>
-            </a>
-
-            <a
-              href="https://github.com/mozzarellastix"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col gap-1 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
-            >
-              <span className="font-semibold text-slate-800 dark:text-slate-100">Silvia Osuna</span>
-              <span className="text-sm text-purple-500">@mozzarellastix on GitHub</span>
-            </a>
-
-            <a
-              href="https://github.com/andreag02"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col gap-1 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
-            >
-              <span className="font-semibold text-slate-800 dark:text-slate-100">Andrea Garza</span>
-              <span className="text-sm text-purple-500">@andreag02 on GitHub</span>
-            </a>
-          </div>
+          {/* Developer GitHub card */}
+          <a
+            href="https://github.com/BUDDY26"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex gap-3 items-center bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
+          >
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Ruben Aleman</span>
+            <span className="text-sm text-purple-500">@BUDDY26 on GitHub</span>
+          </a>
 
           {/* Contact form */}
           <section>
             <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-4">
-              Send Us a Message
+              Send a Message
             </h2>
 
             {status === "success" ? (
