@@ -207,6 +207,7 @@
 | Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
 | Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **COMPLETE ✓** |
 | Phase 5 | Production readiness — vocab bridge, cleanup, docs, final commit | **COMPLETE ✓** |
+| Phase 6 | UI polish — info pages, favicon, mascot navbars, tests | **COMPLETE ✓** |
 
 ---
 
@@ -340,3 +341,43 @@ test/unit/narrvoca/                     ← [Phase 2+3] Jest unit tests (57 pass
 supabase/migrations/                    ← SQL migration + seed files
 docs/progress-log.md                    ← This file
 ```
+
+---
+
+## Session 6 — 2026-02-28
+
+### What Was Accomplished
+
+**Phase 6 — UI Polish and Production Finish (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| `/about` page | `app/about/page.tsx` | Created — mission, team, academic context |
+| `/privacy` page | `app/privacy/page.tsx` | Created — privacy policy for language learning app |
+| `/terms` page | `app/terms/page.tsx` | Created — terms of service |
+| `/contact` page | `app/contact/page.tsx` | Created — GitHub team links + email contact |
+| Footer link hrefs | `components/Footer.tsx` | Fixed — all 4 links now point to real routes |
+| Favicon metadata | `app/layout.tsx` | Added — `icons`, `apple`, `openGraph.images` using `VocoraMascot.svg` |
+| Mascot in Navbar (public) | `components/Navbar.tsx` | Added — 24px mascot icon in purple bubble next to "NarrVoca" |
+| Mascot in Dashboard navbar | `components/dashboard/navbar.tsx` | Added |
+| Mascot in Dashboard navbar2 | `components/dashboard/navbar2.tsx` | Added |
+| Mascot in Dashboard navbar3 | `components/dashboard/navbar3.tsx` | Added |
+| Phase 6 UI tests | `test/unit/narrvoca/phase6-ui.test.tsx` | 11 tests — Footer hrefs, page exports, mascot render |
+
+**Test results:** 9 suites, **96/96 tests passing** (+11 from Phase 6)
+
+**Page design:**
+- All 4 new pages: purple gradient (`from-purple-50 to-white` / dark mode `from-purple-950 to-slate-900`)
+- Full `Navbar` and `Footer` included — layout consistent with landing page
+- Back-to-home link at top-left (`← Back to Home → /`)
+- Purple section headings, card layout for team members (about page)
+
+**Favicon implementation:**
+- `public/VocoraMascot.svg` used as `icon`, `apple`, and `og:image` via Next.js `metadata.icons` object
+- No separate `favicon.ico` file needed — SVG favicon fully supported in modern browsers
+
+**Mascot implementation:**
+- `VocoraMascot` rendered at 24×24px inside a `w-8 h-8 bg-white/20 rounded-full` bubble in all navbars
+- Footer already had the mascot (from Phase 3) — verified still present
+
+**Branch:** `feature/narrvoca-expansion`
