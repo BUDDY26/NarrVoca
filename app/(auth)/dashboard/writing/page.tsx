@@ -79,13 +79,11 @@ function useSetLanguageFromURL() {
           if (updateError) {
             console.error("User preferences update failed:", updateError.message);
           } else {
-            console.log("User preferences updated successfully!");
           }
         } else {
           console.error("User preferences insert failed:", insertError.message);
         }
       } else {
-        console.log("User preferences inserted successfully!");
       }
     };
     // Runs when language changes

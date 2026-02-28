@@ -29,7 +29,6 @@ export function useHoverWord(
     timeoutRef.current = setTimeout(() => {
       const fetchDefinition = async () => {
         const word = hoveredWord.word.toLowerCase();
-        console.log("[DEBUG] Hovered word:", word);
 
         // 1. Check Supabase cache
         try {
@@ -41,7 +40,6 @@ export function useHoverWord(
             .single();
 
           if (cached && !fetchError) {
-            console.log("[DEBUG] Found cached definition in Supabase:", cached);
             setDefinitions((prev) => ({
               ...prev,
               [word]: {
@@ -54,17 +52,15 @@ export function useHoverWord(
           }
 
           if (fetchError) {
-            console.warn("[DEBUG] Supabase cache fetch error:", fetchError.message);
+            console.warn("Supabase cache fetch error:", fetchError.message);
           } else {
-            console.log("[DEBUG] No cached definition found for:", word);
           }
         } catch (err) {
-          console.error("[ERROR] Unexpected error during Supabase cache fetch:", err);
+          console.error("Unexpected error during Supabase cache fetch:", err);
         }
 
         // 2. Fetch from OpenAI
         try {
-          console.log("[DEBUG] Sending POST to /api/generate-definitions...");
           const response = await fetch("/api/generate-definitions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -72,7 +68,6 @@ export function useHoverWord(
           });
 
           const data = await response.json();
-          console.log("[DEBUG] AI response:", data);
 
           const newDef = {
             definition: data.definition || "No definition found.",
@@ -90,14 +85,13 @@ export function useHoverWord(
             lang: userLang,
           }]);
 
-          console.log("[DEBUG] Cached new definition to Supabase");
 
           setDefinitions((prev) => ({
             ...prev,
             [word]: newDef,
           }));
         } catch (error) {
-          console.error("[ERROR] Failed fetching/generating definition:", error);
+          console.error("Failed fetching/generating definition:", error);
           setDefinitions((prev) => ({
             ...prev,
             [word]: {
@@ -131,7 +125,6 @@ export function useHoverWord(
       if (error) {
         console.error("Error adding hovered word:", error);
       } else {
-        console.log("[DEBUG] Hovered word added to vocab list:", hoveredWord.word);
         setWords([...words, hoveredWord.word]);
       }
     }

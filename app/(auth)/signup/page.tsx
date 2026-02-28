@@ -123,7 +123,6 @@ export default function SignUpPage() {
       });
       if (signUpError) throw new Error(signUpError.message);
 
-      console.log("Sign-up successful.", signUpData);
       alert("Please verify your email!")
       router.push(`/login`);
     } catch (error) {

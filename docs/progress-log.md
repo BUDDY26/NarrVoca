@@ -117,17 +117,6 @@
 
 ---
 
-## Overall Status
-
-| Phase | Description | Status |
-|---|---|---|
-| Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
-| Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
-| Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
-| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **COMPLETE ✓** |
-
----
-
 ---
 
 ## Session 4 — 2026-02-28
@@ -164,7 +153,64 @@
 
 ---
 
-## START HERE — Next Session (Phase 4 is done)
+---
+
+## Session 5 — 2026-02-28
+
+### What Was Accomplished
+
+**Phase 5 — Production Readiness (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| Vocab bridge — sync NarrVoca words to Vocora word list | `src/pages/api/narrvoca/sync-vocab.ts` | Created |
+| Vocab bridge tests | `test/unit/narrvoca/api/sync-vocab.test.ts` | 8 tests, all passing |
+| Hook wired for sync-vocab | `hooks/narrvoca/useNarrativeReader.ts` | Step 5 added to `handleSubmit` |
+| Hook test for sync-vocab | `test/unit/narrvoca/useNarrativeReader.test.tsx` | 1 new test |
+| Stub deleted | `src/pages/api/practice-words.ts` | Deleted — confirmed unused |
+| Debug console.logs removed | `hooks/story-generator/useHoverDefinitions.ts` | 8 `[DEBUG]` logs removed |
+| Credential-leaking log removed | `app/(auth)/actions/auth.ts` | `console.log("Sign in attempt:", {email, password})` removed |
+| Auth log removed | `app/(auth)/login/page.tsx` | `console.log("Authentication successful.")` removed |
+| Signup log removed | `app/(auth)/signup/page.tsx` | `console.log("Sign-up successful.")` removed |
+| Preference logs removed | `app/(auth)/dashboard/writing/page.tsx` | 2 console.logs removed |
+| Preference logs removed | `hooks/useSetLanguageFromURL.ts` | 2 console.logs removed |
+| README.md rewritten | `README.md` | Full professional README with tech stack, schema, API, testing, setup |
+| Architecture doc | `docs/architecture.md` | System architecture, data flows, ER relationships |
+| API reference doc | `docs/api-reference.md` | All 5 NarrVoca routes + Vocora routes + query helpers |
+
+**Test results:** 8 suites, **85/85 tests passing**
+
+**Vocab bridge design:**
+- `POST /api/narrvoca/sync-vocab` — after checkpoint completion, fetches `node_vocabulary WHERE is_target=true`, gets `vocabulary.term` for each word, checks against `vocab_words` for this user+language, inserts only new words
+- Result: NarrVoca-learned words appear in the Vocora story-generator word picker automatically
+- No new junction table needed — the existing `vocab_words` table serves as the bridge
+
+**Env file note:**
+- The `env` file lives at `NarrVoca/env` (one level above the project root)
+- Next.js will NOT auto-load it from that location — it must be at `NarrVoca/NarrVoca/.env.local`
+- For local dev: copy `NarrVoca/env` to `NarrVoca/NarrVoca/.env.local` before running `npm run dev`
+- Vercel deployment: all keys are set via the Vercel dashboard environment variables
+
+**Notes / gotchas:**
+- `vocab_words` has no unique constraint on `(uid, word, language)` — the sync route reads existing words and skips duplicates manually rather than relying on DB-level upsert
+- All `console.log` calls with credential data or `[DEBUG]` tags are removed; `console.error` and `console.warn` kept for real error reporting
+- Branch: `feature/narrvoca-expansion`
+
+---
+
+## Overall Status
+
+| Phase | Description | Status |
+|---|---|---|
+| Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
+| Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
+| Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
+| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **COMPLETE ✓** |
+| Phase 5 | Production readiness — vocab bridge, cleanup, docs, final commit | **COMPLETE ✓** |
+
+---
+
+## START HERE — Next Session (ALL PHASES COMPLETE)
 
 Phase 4 connects everything: replaces the placeholder accuracy score with real LLM grading, adds proper server-side auth, and wires vocab mastery updates into the reader flow.
 

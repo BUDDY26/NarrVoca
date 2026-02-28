@@ -138,6 +138,18 @@ export function useNarrativeReader() {
       console.error('useNarrativeReader: failed to update vocab mastery', e);
     }
 
+    // Step 5: Sync target vocab words into the user's Vocora word list so they
+    // appear in the story-generator word picker and dashboard word list.
+    try {
+      await fetch('/api/narrvoca/sync-vocab', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ uid, node_id: currentNode.node_id, target_language: fullStory.story.target_language }),
+      });
+    } catch (e) {
+      console.error('useNarrativeReader: failed to sync vocab to word list', e);
+    }
+
     const nextNodeId = await resolveBranch(currentNode.node_id, accuracy_score);
     advanceToNode(fullStory, nextNodeId);
     setUserInput('');

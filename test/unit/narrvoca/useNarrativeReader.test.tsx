@@ -266,6 +266,16 @@ describe('handleSubmit', () => {
     expect(result.current.feedback).toBeNull();
   });
 
+  it('calls sync-vocab API after checkpoint submit', async () => {
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    const syncCalls = (global.fetch as jest.Mock).mock.calls.filter(
+      (c: unknown[]) => c[0] === '/api/narrvoca/sync-vocab'
+    );
+    expect(syncCalls).toHaveLength(1);
+  });
+
   it('calls update-mastery for each vocab word associated with the node', async () => {
     mockGetNodeVocab.mockResolvedValue([
       { node_id: 11, vocab_id: 5, is_target: true },
