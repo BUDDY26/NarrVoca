@@ -210,7 +210,18 @@
 
 ---
 
-## START HERE — Next Session (ALL PHASES COMPLETE)
+## START HERE — Next Session (ALL PHASES COMPLETE ✓)
+
+All 5 phases are done. The branch `feature/narrvoca-expansion` is pushed and ready for PR to `main`.
+
+### Env Note (IMPORTANT for local dev)
+- `NarrVoca/env` exists one level above the project root — Next.js will NOT auto-load it
+- Run this once before `npm run dev`:
+  ```bash
+  cp NarrVoca/env NarrVoca/NarrVoca/.env.local
+  ```
+- `.env.local` is in `.gitignore` — safe to keep locally, never committed
+- Vercel: all env vars configured in Vercel dashboard (already live)
 
 Phase 4 connects everything: replaces the placeholder accuracy score with real LLM grading, adds proper server-side auth, and wires vocab mastery updates into the reader flow.
 
