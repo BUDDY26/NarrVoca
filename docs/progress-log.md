@@ -381,3 +381,45 @@ docs/progress-log.md                    ← This file
 - Footer already had the mascot (from Phase 3) — verified still present
 
 **Branch:** `feature/narrvoca-expansion`
+
+---
+
+## Session 7 — 2026-02-28 (Phase 6 corrections)
+
+### What Was Accomplished
+
+**Phase 6 Corrections and Formspree Integration (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| University name corrected | `README.md`, `docs/progress-log.md`, `app/about/page.tsx` | "University of Houston" → "University of Texas Rio Grande Valley" everywhere |
+| Email domain corrected | `app/contact/page.tsx` | `uh.edu` → `utrgv.edu` (later replaced with Formspree form) |
+| Andrea Garza GitHub added | `README.md`, `docs/progress-log.md`, `app/about/page.tsx`, `app/contact/page.tsx` | `@andreag02` / `github.com/andreag02` added to all team references |
+| Contact page — Formspree form | `app/contact/page.tsx` | Replaced fake email with real contact form (name, email, message, success/error state) |
+| Privacy page — fake email removed | `app/privacy/page.tsx` | `privacy@narrvoca.app` replaced with Link to `/contact` |
+| Formspree form ID activated | `app/contact/page.tsx` | Form ID `meeldwpg` set — submissions forward to `ruben.aleman@gmail.com` |
+
+**Formspree details:**
+- Endpoint: `https://formspree.io/f/meeldwpg`
+- Destination: `ruben.aleman@gmail.com`
+- Free tier: 50 submissions/month
+- No fake email addresses remain anywhere in project source files
+
+**Test results:** 9 suites, **96/96 tests passing** (unchanged)
+
+**Branch:** `feature/narrvoca-expansion` — all commits pushed
+
+---
+
+## Overall Status (FINAL)
+
+| Phase | Description | Status |
+|---|---|---|
+| Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
+| Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
+| Phase 3 | Frontend UI — narrative reader + NarrVoca rebrand | **COMPLETE ✓** |
+| Phase 4 | Integration — real LLM grading, auth guards, vocab mastery wiring | **COMPLETE ✓** |
+| Phase 5 | Production readiness — vocab bridge, cleanup, docs, final commit | **COMPLETE ✓** |
+| Phase 6 | UI polish — info pages, favicon, mascot navbars, Formspree contact form | **COMPLETE ✓** |
+
+**9 suites · 96 tests · 96 passing · branch pushed · ready for PR to main**
