@@ -36,8 +36,39 @@
   - 10 node_vocabulary rows, 2 node_grammar rows
 - Verified in Supabase Table Editor with `002_seed_verify.sql`
 
-**Phase 2 — NOT STARTED**
-- Planning complete, architecture decided, ready to begin next session
+**Phase 2 — COMPLETE ✓**
+- All files written, all 39 tests passing
+
+---
+
+## Session 2 — 2026-02-28
+
+### What Was Accomplished
+
+**Phase 2 — Backend API Layer (COMPLETE ✓)**
+
+| File | Status |
+|---|---|
+| `jest.config.js` | Created — `next/jest` + `moduleNameMapper` for `@/` alias |
+| `lib/narrvoca/types.ts` | Created — interfaces for all 11 tables + `FullStory` |
+| `lib/narrvoca/branching.ts` | Created — `applyBranchingRules` (pure fn) + `resolveBranch` (DB) |
+| `lib/narrvoca/queries.ts` | Created — 6 query helpers with Supabase client |
+| `src/pages/api/narrvoca/log-interaction.ts` | Created — POST, 201/400/405/500 |
+| `src/pages/api/narrvoca/update-progress.ts` | Created — POST upsert with `onConflict` |
+| `src/pages/api/narrvoca/update-mastery.ts` | Created — POST upsert + SRS interval logic |
+| `test/unit/narrvoca/branching.test.ts` | Created — 12 tests, all passing |
+| `test/unit/narrvoca/queries.test.ts` | Created — 13 tests, all passing |
+| `test/unit/narrvoca/api/log-interaction.test.ts` | Created — 5 tests, all passing |
+| `test/unit/narrvoca/api/update-progress.test.ts` | Created — 5 tests, all passing |
+| `test/unit/narrvoca/api/update-mastery.test.ts` | Created — 9 tests, all passing |
+
+**Test results:** 5 suites, **39/39 tests passing**
+
+**Notes / gotchas:**
+- `jest.config.js` (not `.ts`) — avoids needing `ts-node`; use CommonJS `require('next/jest')`
+- Must add explicit `moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' }` — `next/jest` alone did not resolve the alias in this project
+- `branching.test.ts` must `jest.mock('@/lib/supabase')` even though it only tests the pure fn — the module import chain triggers `lib/supabase.ts` which fails without env vars
+- Branch: `feature/narrvoca-expansion`
 
 ---
 
@@ -46,74 +77,52 @@
 | Phase | Description | Status |
 |---|---|---|
 | Phase 1 | SQL migration — 11 tables + seed data | **COMPLETE ✓** |
-| Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **NOT STARTED** |
+| Phase 2 | Backend API layer — query helpers, API routes, branching resolver | **COMPLETE ✓** |
 | Phase 3 | Frontend UI — narrative reader at `/dashboard/narrative` | **NOT STARTED** |
 | Phase 4 | Integration — auth guards, connect Vocora + NarrVoca vocab tables | **NOT STARTED** |
 
 ---
 
-## START HERE — Next Session (Phase 2)
+## START HERE — Next Session (Phase 3)
 
-### Step-by-step for Phase 2
+### Step-by-step for Phase 3
 
-**Step 1 — Install Jest (run in terminal)**
-```bash
-npm install --save-dev jest jest-environment-node @types/jest
-```
+Phase 3 builds the narrative reader UI at `app/(auth)/dashboard/narrative/page.tsx`.
+Do NOT touch the existing `story-generator/` page.
 
-**Step 2 — Create `jest.config.ts`** (project root)
-- Use `next/jest` — handles `@/` path aliases and SWC transpilation automatically
-- `testEnvironment: 'node'`
-- `testMatch: ['**/test/unit/**/*.test.ts']`
+**Step 1 — Create the page scaffold**
+- File: `app/(auth)/dashboard/narrative/page.tsx`
+- Mark `'use client'` — needs hooks
+- Import `getFullStory` from `@/lib/narrvoca/queries`
+- Import `resolveBranch` from `@/lib/narrvoca/branching`
+- Use `supabase.auth.getUser()` client-side to get `uid`
 
-**Step 3 — Create `lib/narrvoca/types.ts`**
-TypeScript interfaces for all 11 new tables:
-`Story`, `StoryNode`, `NodeText`, `BranchingLogic`, `Vocabulary`, `GrammarPoint`,
-`NodeVocabulary`, `NodeGrammar`, `UserNodeProgress`, `UserVocabMastery`, `InteractionLog`,
-plus composite type `FullStory` (story + nodes + texts)
+**Step 2 — Story selection view**
+- On mount: call `getStories()` to list available stories
+- Show story cards (title, target_language, difficulty_level)
+- On select: load that story with `getFullStory(storyId)` and enter reader view
 
-**Step 4 — Branching resolver (TDD)**
-- Test file: `test/unit/narrvoca/branching.test.ts`
-- Implementation: `lib/narrvoca/branching.ts`
-- Key design: split into `applyBranchingRules(rules, score?)` (pure fn, no mock needed)
-  and `resolveBranch(nodeId, score?)` (calls DB)
-- Pass threshold constant: `PASS_THRESHOLD = 0.7`
+**Step 3 — Node reader view**
+- Display current node's text (`node.texts`) filtered to user's display language
+- Show bilingual toggle (en ↔ target language)
+- Checkpoint nodes: show a text input + submit button
+- Non-checkpoint nodes: show a "Continue" button
 
-**Step 5 — Query helpers (TDD)**
-- Test file: `test/unit/narrvoca/queries.test.ts`
-- Implementation: `lib/narrvoca/queries.ts`
-- Functions: `getStories()`, `getStoryById(id)`, `getNodesByStoryId(storyId)`,
-  `getNodeText(nodeId)`, `getFullStory(storyId)`, `getBranchingRules(nodeId)`
-- Mock pattern: `jest.mock('@/lib/supabase', ...)` — make chain thenable via `.then`
+**Step 4 — Checkpoint interaction**
+- On submit: POST to `/api/narrvoca/log-interaction` with `{ uid, node_id, user_input, accuracy_score }`
+- For Phase 3, `accuracy_score` can be a placeholder (0.8) — real LLM grading in Phase 4
+- After logging: POST to `/api/narrvoca/update-progress` with `{ uid, node_id, status: 'completed', accuracy_score }`
+- Then: POST to `/api/narrvoca/update-mastery` for each vocab word in the node
+- Then: call `resolveBranch(node_id, accuracy_score)` to get next node
 
-**Step 6 — API: log-interaction (TDD)**
-- Test: `test/unit/narrvoca/api/log-interaction.test.ts`
-- Implementation: `src/pages/api/narrvoca/log-interaction.ts`
-- `POST` — body: `{ uid, node_id, user_input, llm_feedback?, accuracy_score }`
-- Response 201: `{ interaction_id }`
-- Errors: 400 (missing fields), 405 (wrong method), 500 (DB error)
+**Step 5 — Navigation**
+- After resolving next node, update current node state
+- If no next node (end of story): show completion screen
 
-**Step 7 — API: update-progress (TDD)**
-- Test: `test/unit/narrvoca/api/update-progress.test.ts`
-- Implementation: `src/pages/api/narrvoca/update-progress.ts`
-- `POST` — body: `{ uid, node_id, status, accuracy_score? }`
-- Upsert logic: `best_score` only updates if new score > existing; `completed_at` set once
-- Response 200: `{ uid, node_id, status, best_score, completed_at }`
+**Step 6 — Add nav link**
+- Add "Narrative" link to the dashboard sidebar/nav (find existing nav component)
 
-**Step 8 — API: update-mastery (TDD)**
-- Test: `test/unit/narrvoca/api/update-mastery.test.ts`
-- Implementation: `src/pages/api/narrvoca/update-mastery.ts`
-- `POST` — body: `{ uid, vocab_id, mastery_score }`
-- Compute `next_review_at` from score: <0.3→1d, <0.6→3d, <0.8→7d, ≥0.8→14d
-- Response 200: `{ uid, vocab_id, mastery_score, next_review_at }`
-
-**Step 9 — Run all tests**
-```bash
-npm test
-```
-Expect all tests green before closing Phase 2.
-
-**Step 10 — Update this log and commit**
+**Step 7 — Update this log and commit**
 
 ---
 
