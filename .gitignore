@@ -21,6 +21,7 @@ yarn-error.log*
 .env.local
 .env*.local
 .env*
+!.env.local.example
 env.prod.txt
 # parent-directory env file (NarrVoca/env — outside repo root but listed for safety)
 ../.env
