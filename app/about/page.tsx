@@ -59,11 +59,19 @@ export default function AboutPage() {
           <section>
             <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">Developers</h2>
             <div className="grid grid-cols-3 gap-4">
-              {[
-                { name: "Ruben Aleman",  handle: "CSCI 6333" },
-                { name: "Silvia Ozuna",  handle: "CSCI 6333" },
-                { name: "Andrea Garza",  handle: "CSCI 6333" },
-              ].map(({ name, handle }) => (
+              <a
+                href="https://github.com/BUDDY26"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center text-center bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
+              >
+                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-3">
+                  <VocoraMascot width={32} height={32} />
+                </div>
+                <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">Ruben Aleman</p>
+                <p className="text-xs text-purple-400 dark:text-purple-500 mt-1">@BUDDY26</p>
+              </a>
+              {["Silvia Ozuna", "Andrea Garza"].map((name) => (
                 <div
                   key={name}
                   className="flex flex-col items-center text-center bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800"
@@ -72,7 +80,7 @@ export default function AboutPage() {
                     <VocoraMascot width={32} height={32} />
                   </div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">{name}</p>
-                  <p className="text-xs text-purple-400 dark:text-purple-500 mt-1">{handle}</p>
+                  <p className="text-xs text-purple-400 dark:text-purple-500 mt-1">CSCI 6333</p>
                 </div>
               ))}
             </div>
