@@ -97,3 +97,68 @@ export interface FullStory {
   story: Story;
   nodes: Array<StoryNode & { texts: NodeText[] }>;
 }
+
+// =============================================================================
+// NarrVoca 2.0 — RAG Layer 4 Types (Migration 003)
+// =============================================================================
+
+export interface EmbeddingStore {
+  embedding_id: number;
+  source_type: 'node_text' | 'vocabulary' | 'grammar_point';
+  source_id: number;
+  language_code: string | null;
+  content_text: string | null;
+  embedding: number[];               // vector(1536) returned as number[]
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RagQueryLog {
+  query_id: number;
+  uid: string;
+  node_id: number | null;
+  query_text: string;
+  query_embedding: number[] | null;  // vector(1536) — nullable
+  source_type_filter: string | null;
+  top_k: number;
+  created_at: string;
+}
+
+export interface RagContextChunk {
+  chunk_id: number;
+  query_id: number;
+  embedding_id: number;
+  rank: number;
+  similarity_score: number | null;
+  chunk_text: string | null;
+}
+
+export interface GradingRubric {
+  rubric_id: number;
+  node_id: number;
+  criterion: string;
+  weight: number;
+  example_correct: string | null;
+  created_at: string;
+}
+
+export interface CheckpointGrade {
+  grade_id: number;
+  uid: string;
+  node_id: number;
+  interaction_id: number | null;
+  rubric_scores: Record<string, number> | null;  // { rubric_id: score }
+  overall_score: number;
+  feedback: string | null;
+  attempt_number: number;
+  created_at: string;
+}
+
+export interface TutorSession {
+  session_id: number;
+  uid: string;
+  story_id: number;
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  created_at: string;
+  updated_at: string;
+}
