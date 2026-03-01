@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { retrieveChunks } from '@/lib/narrvoca/rag';
 import type { RagSupabaseClient, RagOpenAIClient } from '@/lib/narrvoca/rag';
 import type { GradingRubric } from '@/lib/narrvoca/types';
+import { queryCache } from '@/lib/narrvoca/query-cache';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -33,14 +34,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Step 1 — Fetch rubrics for this checkpoint node
-    const { data: rubricData, error: rubricError } = await supabase
-      .from('grading_rubrics')
-      .select('*')
-      .eq('node_id', node_id);
+    // Step 1 — Fetch rubrics for this checkpoint node (cache-first)
+    const rubricCacheKey = `rubrics:${node_id as number}`;
+    let rubrics = queryCache.get<GradingRubric[]>(rubricCacheKey);
+    if (rubrics === undefined) {
+      const { data: rubricData, error: rubricError } = await supabase
+        .from('grading_rubrics')
+        .select('*')
+        .eq('node_id', node_id);
 
-    if (rubricError) return res.status(500).json({ error: rubricError.message });
-    const rubrics = (rubricData as GradingRubric[]) ?? [];
+      if (rubricError) return res.status(500).json({ error: rubricError.message });
+      rubrics = (rubricData as GradingRubric[]) ?? [];
+      queryCache.set(rubricCacheKey, rubrics);
+    }
 
     // Step 2 — RAG retrieval: get relevant story context using the student's answer
     const chunks = await retrieveChunks(
