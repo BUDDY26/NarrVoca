@@ -444,4 +444,137 @@ docs/progress-log.md                    ← This file
 | All tests green | 9 suites, 96 tests | ✓ 96/96 passing |
 | Branch pushed | `feature/narrvoca-expansion` | ✓ Ready for PR to main |
 
-**NarrVoca is production-ready. All 6 phases complete.**
+**NarrVoca 1.0 is production-ready. All 6 phases complete.**
+
+---
+
+## Session 9 — 2026-02-28 (NarrVoca 2.0 — V2.1 RAG Foundation)
+
+### What Was Accomplished
+
+**V2.1 — RAG Layer 4 Foundation (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| Layer 4 migration SQL | `supabase/migrations/003_rag_layer4.sql` | Written — 6 RAG tables + pgvector + HNSW index |
+| Layer 4 rollback SQL | `supabase/migrations/003_rag_layer4_rollback.sql` | Written |
+| RAG types | `lib/narrvoca/types.ts` | 6 new interfaces appended |
+| Embedding generation script | `scripts/generate-embeddings.ts` | Written — 4 exported functions |
+| Migration test | `test/unit/narrvoca/rag/migration-layer4.test.ts` | 38 tests, all passing |
+| Embedding script test | `test/unit/narrvoca/rag/generate-embeddings.test.ts` | 27 tests, all passing |
+
+**Test results:** 11 suites, **161/161 tests passing** (+65 from V2.1)
+
+---
+
+### New Tables (6) — Migration 003 — NOT YET APPLIED TO SUPABASE
+
+| Table | Purpose | Key Columns |
+|---|---|---|
+| `embedding_store` | pgvector store for node_text, vocabulary, grammar_point | `source_type`, `source_id`, `embedding vector(1536)` — UNIQUE(source_type, source_id) |
+| `rag_query_log` | Audit log of every RAG retrieval query | `uid`, `node_id` (FK→story_nodes), `query_text`, `query_embedding`, `top_k` |
+| `rag_context_chunks` | Caches top-k retrieved chunks per query | `query_id` (FK→rag_query_log), `embedding_id` (FK→embedding_store), `rank`, `similarity_score` |
+| `grading_rubrics` | Defines correct-answer criteria per checkpoint node | `node_id` (FK→story_nodes), `criterion`, `weight`, `example_correct` |
+| `checkpoint_grades` | Stores AI grades per user per checkpoint attempt | `uid`, `node_id`, `interaction_id`, `rubric_scores jsonb`, `overall_score` |
+| `tutor_sessions` | Full tutor conversation history per user per story | `uid`, `story_id` (FK→stories), `messages jsonb DEFAULT '[]'`, `updated_at` |
+
+**Indexes created:**
+- `idx_embedding_store_hnsw` — USING hnsw (embedding vector_cosine_ops) — vector similarity search
+- `idx_embedding_store_source` — B-tree on (source_type, source_id)
+- `idx_rag_query_log_uid`, `idx_rag_query_log_node_id`
+- `idx_rag_context_chunks_query_id`
+- `idx_grading_rubrics_node_id`
+- `idx_checkpoint_grades_uid_node`
+- `idx_tutor_sessions_uid_story`
+
+---
+
+### Embedding Script (`scripts/generate-embeddings.ts`)
+
+**Model:** `text-embedding-3-small` (1536 dimensions)
+**Batch size:** 20 records per OpenAI API call
+
+**Exported functions (all independently testable via dependency injection):**
+- `fetchSourceRecords(supabase)` — fetches all embeddable content from node_text, vocabulary, grammar_points
+- `generateEmbeddings(openai, texts[])` — calls OpenAI embeddings API, returns number[][]
+- `upsertEmbeddings(supabase, records, embeddings)` — upserts to embedding_store with onConflict (source_type, source_id)
+- `runEmbeddingGeneration(supabase, openai, batchSize?)` — full pipeline, returns { processed, batches }
+
+**Run command (once migration is applied):**
+```bash
+npx tsx scripts/generate-embeddings.ts
+```
+Requires: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`
+
+---
+
+---
+
+## Session 10 — 2026-02-28 (NarrVoca 2.0 — V2.2 Retrieval)
+
+### What Was Accomplished
+
+**V2.2 — RAG Retrieval Layer (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| pgvector RPC function | `supabase/migrations/004_match_embeddings_fn.sql` | Written — NOT YET APPLIED |
+| RPC rollback | `supabase/migrations/004_match_embeddings_fn_rollback.sql` | Written |
+| Retrieval library | `lib/narrvoca/rag.ts` | `retrieveChunks` + types + DI interfaces |
+| Log RAG query API | `src/pages/api/narrvoca/log-rag-query.ts` | POST → `rag_query_log`, returns `query_id` |
+| Cache RAG chunks API | `src/pages/api/narrvoca/cache-rag-chunks.ts` | POST → `rag_context_chunks`, returns `inserted` |
+| Migration 004 test | `test/unit/narrvoca/rag/migration-004.test.ts` | 12 tests |
+| Retrieval unit tests | `test/unit/narrvoca/rag/retrieve-chunks.test.ts` | 18 tests |
+| log-rag-query API tests | `test/unit/narrvoca/rag/api/log-rag-query.test.ts` | 8 tests |
+| cache-rag-chunks API tests | `test/unit/narrvoca/rag/api/cache-rag-chunks.test.ts` | 10 tests |
+| Sample query tests | `test/unit/narrvoca/rag/sample-queries.test.ts` | 9 tests (En el Mercado fixtures) |
+
+**Test results:** 16 suites, **218/218 tests passing** (+57 from V2.2)
+
+---
+
+### V2.2 Architecture
+
+**`retrieveChunks(supabase, openai, query, options?)` — `lib/narrvoca/rag.ts`**
+1. Embeds the query via `text-embedding-3-small`
+2. Calls `match_embeddings` RPC (pgvector `<=>` cosine distance, ordered ASC = most similar first)
+3. Applies optional client-side `minSimilarity` threshold
+- Options: `topN` (default 5), `sourceType` filter, `minSimilarity` threshold
+- Uses dependency injection → no `jest.mock` needed in tests
+
+**`match_embeddings` SQL function** — `supabase/migrations/004_match_embeddings_fn.sql`
+```sql
+CREATE OR REPLACE FUNCTION match_embeddings(
+  query_embedding    vector(1536),
+  match_count        int  DEFAULT 5,
+  filter_source_type text DEFAULT NULL
+) RETURNS TABLE (embedding_id, source_type, source_id, language_code, content_text, similarity float)
+-- similarity = (1 - (embedding <=> query_embedding))::float
+-- ORDER BY embedding <=> query_embedding LIMIT match_count
+```
+
+**`POST /api/narrvoca/log-rag-query`** — body: `{ uid, query_text, node_id?, top_k?, source_type_filter? }` → `{ query_id }`
+**`POST /api/narrvoca/cache-rag-chunks`** — body: `{ query_id, chunks: RetrievedChunk[] }` → `{ inserted }` — ranks 1-indexed by array position, stores `similarity_score` and `chunk_text`
+
+---
+
+### NEXT STEPS — Apply V2.2 to Supabase
+
+1. Run `004_match_embeddings_fn.sql` in Supabase SQL Editor
+2. Proceed to V2.3 — wire `retrieveChunks` into `grade-response` (inject retrieved rubric + context into grading prompt)
+
+---
+
+### V2.1 NEXT STEPS — Apply V2.1 Migration to Supabase
+
+1. ~~Run `003_rag_layer4.sql`~~ ✓ Applied — 6 RAG tables live in Supabase
+2. ~~Run `scripts/generate-embeddings.ts`~~ ✓ Embeddings seeded for all "En el Mercado" content
+
+---
+
+### Architecture Decisions (V2.0 additions)
+
+- **pgvector** enabled via `CREATE EXTENSION IF NOT EXISTS vector` in migration 003
+- **HNSW index** used for vector similarity (cosine ops) — requires pgvector ≥ 0.5 (Supabase provides 0.7+)
+- **Dependency injection pattern** for embedding script — supabase and openai clients are passed as params, enabling clean unit tests without jest.mock at module level
+- **source_type UNIQUE constraint** on embedding_store — each DB record has at most one embedding; re-running the script is safe (upsert overwrites stale vectors)
