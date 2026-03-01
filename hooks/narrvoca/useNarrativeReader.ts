@@ -179,6 +179,7 @@ export function useNarrativeReader() {
 
   return {
     uid,
+    accessToken,
     stories,
     fullStory,
     currentNode,

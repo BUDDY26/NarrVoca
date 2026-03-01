@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BookOpen, ChevronRight, CheckCircle2, RotateCcw } from 'lucide-react';
+import { BookOpen, Bot, ChevronRight, CheckCircle2, RotateCcw, Send } from 'lucide-react';
 import { Navbar3 } from '@/components/dashboard/navbar3';
 import { useNarrativeReader } from '@/hooks/narrvoca/useNarrativeReader';
+import { useTutorChat } from '@/hooks/narrvoca/useTutorChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,8 @@ function difficultyVariant(level: Story['difficulty_level']) {
 // ---------------------------------------------------------------------------
 export default function NarrativePage() {
   const {
+    uid,
+    accessToken,
     stories,
     fullStory,
     currentNode,
@@ -40,6 +43,22 @@ export default function NarrativePage() {
     handleSubmit,
     resetStory,
   } = useNarrativeReader();
+
+  const {
+    messages: tutorMessages,
+    chatInput,
+    setChatInput,
+    isTyping,
+    isChatOpen,
+    setIsChatOpen,
+    sendMessage,
+  } = useTutorChat({
+    uid,
+    accessToken,
+    storyId: fullStory?.story.story_id ?? null,
+    nodeId: currentNode?.node_id ?? null,
+    targetLanguage: fullStory?.story.target_language ?? 'es',
+  });
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -287,6 +306,87 @@ export default function NarrativePage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* ── AI Tutor chat panel ───────────────────────────────────── */}
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                className="gap-2 text-purple-600 border-purple-300 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-950"
+              >
+                <Bot className="h-4 w-4" />
+                {isChatOpen ? 'Close Tutor' : 'Ask Tutor'}
+              </Button>
+
+              {isChatOpen && (
+                <Card className="mt-2 border-purple-100 dark:border-purple-800 dark:bg-slate-800">
+                  <CardContent className="p-4 space-y-3">
+                    {/* Message list */}
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {tutorMessages.length === 0 && (
+                        <p className="text-sm text-slate-400 text-center py-4 italic">
+                          Ask your tutor anything about this story!
+                        </p>
+                      )}
+                      {tutorMessages.map((msg, i) => (
+                        <div
+                          key={i}
+                          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`rounded-lg px-3 py-2 text-sm max-w-[85%] ${
+                              msg.role === 'user'
+                                ? 'bg-purple-600 text-white'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Typing indicator — three animated dots */}
+                      {isTyping && (
+                        <div className="flex justify-start">
+                          <div className="rounded-lg px-3 py-2 bg-slate-100 dark:bg-slate-700">
+                            <span className="flex gap-1 items-center h-4">
+                              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Input row */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && chatInput.trim()) {
+                            void sendMessage(chatInput);
+                          }
+                        }}
+                        placeholder="Ask your tutor…"
+                        className="flex-1 rounded-md border border-purple-200 dark:border-purple-700 bg-transparent px-3 py-1.5 text-sm focus:outline-none focus:border-purple-400"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => { if (chatInput.trim()) void sendMessage(chatInput); }}
+                        disabled={!chatInput.trim() || isTyping}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-3"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </motion.div>
         </div>
       </main>
