@@ -80,7 +80,6 @@ export default function AboutPage() {
                     <VocoraMascot width={32} height={32} />
                   </div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">{name}</p>
-                  <p className="text-xs text-purple-400 dark:text-purple-500 mt-1">CSCI 6333</p>
                 </div>
               ))}
             </div>
