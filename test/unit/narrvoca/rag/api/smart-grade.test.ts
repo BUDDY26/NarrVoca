@@ -8,9 +8,18 @@ const mockRetrieveChunks = jest.fn();
 const mockCreate = jest.fn();    // openai.chat.completions.create
 const mockGetUser = jest.fn();
 const mockFrom = jest.fn();
+const mockCacheGet = jest.fn();
+const mockCacheSet = jest.fn();
 
 jest.mock('@/lib/narrvoca/rag', () => ({
   retrieveChunks: (...args: unknown[]) => mockRetrieveChunks(...args),
+}));
+
+jest.mock('@/lib/narrvoca/query-cache', () => ({
+  queryCache: {
+    get: (...args: unknown[]) => mockCacheGet(...args),
+    set: (...args: unknown[]) => mockCacheSet(...args),
+  },
 }));
 
 jest.mock('openai', () =>
@@ -88,6 +97,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGetUser.mockResolvedValue({ data: { user: { id: 'test-uid' } } });
   mockRetrieveChunks.mockResolvedValue(SAMPLE_CHUNKS);
+  mockCacheGet.mockReturnValue(undefined); // default: cache miss
   setupOpenAI(0.88, 'Excellent use of vocabulary and correct conjugation!');
   setupHappyPath();
 });
@@ -227,5 +237,34 @@ describe('POST /api/narrvoca/smart-grade', () => {
     const res = makeRes();
     await handler(req as NextApiRequest, res as NextApiResponse);
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('stores fetched rubrics in the cache after a DB fetch', async () => {
+    const req = makeReq('POST', VALID_BODY);
+    const res = makeRes();
+    await handler(req as NextApiRequest, res as NextApiResponse);
+    expect(mockCacheSet).toHaveBeenCalledWith(
+      `rubrics:${VALID_BODY.node_id}`,
+      SAMPLE_RUBRICS
+    );
+  });
+
+  it('uses cached rubrics and skips the DB fetch when cache is warm', async () => {
+    mockCacheGet.mockReturnValue(SAMPLE_RUBRICS); // cache hit
+
+    // Re-setup mockFrom for cache-warm path: only one from() call (checkpoint_grades insert)
+    mockFrom.mockReset();
+    const mockSingle = jest.fn().mockResolvedValue({ data: { grade_id: 77 }, error: null });
+    const mockSelectAfterInsert = jest.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = jest.fn().mockReturnValue({ select: mockSelectAfterInsert });
+    mockFrom.mockReturnValue({ insert: mockInsert });
+
+    const req = makeReq('POST', VALID_BODY);
+    const res = makeRes();
+    await handler(req as NextApiRequest, res as NextApiResponse);
+    // grading_rubrics table should NOT have been queried
+    expect(mockFrom).not.toHaveBeenCalledWith('grading_rubrics');
+    // grade should still be stored and response returned normally
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 });

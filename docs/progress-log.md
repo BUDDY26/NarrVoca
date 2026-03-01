@@ -572,9 +572,71 @@ CREATE OR REPLACE FUNCTION match_embeddings(
 
 ---
 
+## Session 11 — 2026-03-01 (NarrVoca 2.0 — V2.5 Polish and Scale)
+
+### What Was Accomplished
+
+**V2.5 — Polish and Scale (COMPLETE ✓)**
+
+| Item | File(s) | Status |
+|---|---|---|
+| Single-record embed library | `lib/narrvoca/embed.ts` | `embedSingleRecord(supabase, openai, record)` — DI, upserts to `embedding_store` |
+| Auto-embed API route | `src/pages/api/narrvoca/embed-content.ts` | POST, auth-guarded, validates source_type, returns `{ embedding_id }` (201) |
+| TTL query cache | `lib/narrvoca/query-cache.ts` | `QueryCache` class — get/set/has/invalidate/clear/size, 5-min default TTL, lazy expiry |
+| Smart-grade cache integration | `src/pages/api/narrvoca/smart-grade.ts` | Modified — rubric fetch wrapped with `queryCache.get/set('rubrics:{node_id}')` |
+| RAG-powered SRS vocab review | `src/pages/api/narrvoca/vocab-review.ts` | GET — fetches due words from `user_vocab_mastery`, joins vocab, retrieves RAG context per word |
+| Rubric seeder script | `scripts/seed-rubrics.ts` | One-shot, idempotent — seeded 4 rubrics for Node 3 "En el Mercado" checkpoint |
+| embed-single tests | `test/unit/narrvoca/rag/embed-single.test.ts` | 14 tests — model, input, upsert shape, embedding, language_code, error paths, all 3 source_types |
+| query-cache tests | `test/unit/narrvoca/rag/query-cache.test.ts` | 15 tests — get/set, TTL, lazy removal, has, invalidate, clear, size (fake timers) |
+| embed-content API tests | `test/unit/narrvoca/rag/api/embed-content.test.ts` | 10 tests — 405, 401×2, 400×3, 201, optional language_code, 500 |
+| vocab-review API tests | `test/unit/narrvoca/rag/api/vocab-review.test.ts` | 13 tests — 405, 401×2, 400×2, empty/due words, per-word shape, RAG chunks, RAG fallback, 500 |
+| smart-grade cache tests | `test/unit/narrvoca/rag/api/smart-grade.test.ts` | +2 tests — cache miss stores rubrics; cache hit skips DB fetch, still returns 200 |
+| Test bug fix | `test/unit/narrvoca/rag/api/smart-grade.test.ts` | Cache-warm test: added `mockFrom.mockReset()` before single-from-call path to prevent `mockReturnValueOnce` bleed |
+
+**Test results: 25 suites · 340 tests · 340 passing** (+54 from V2.5)
+
+---
+
+### V2.5 Architecture
+
+**Auto-Embed Pipeline (`embed-content`)**
+- `lib/narrvoca/embed.ts` — `embedSingleRecord(supabase, openai, record)` generates one vector and upserts it to `embedding_store` with `onConflict: 'source_type,source_id'` — idempotent
+- `POST /api/narrvoca/embed-content` — call this whenever a new `node_text`, `vocabulary`, or `grammar_point` row is created; returns the `embedding_id` of the upserted row
+- DI pattern → no `jest.mock` needed in library tests; API route tests mock `embedSingleRecord` at module level
+
+**RAG-Powered SRS Vocab Review (`vocab-review`)**
+- `GET /api/narrvoca/vocab-review?uid=&target_language=` — finds all `user_vocab_mastery` rows where `next_review_at ≤ NOW()`, fetches vocab details, calls `retrieveChunks(vocab.term, {topN:3, sourceType:'node_text'})` per word
+- RAG failure is non-fatal — word returned with `context_chunks: []` if `retrieveChunks` throws
+- Integrates directly with the existing SRS intervals set by `update-mastery`
+
+**Query Cache (`query-cache`)**
+- Singleton `queryCache` export — shared across API routes in the same Node.js process
+- `smart-grade` caches rubrics per `node_id` with 5-min TTL; cache hit eliminates one Supabase round-trip per grading request
+- Pattern: `queryCache.get<T>(key) ?? fetchFromDB()` then `queryCache.set(key, value)`
+
+**Gotcha fixed:**
+- Cache-warm test in `smart-grade.test.ts` must call `mockFrom.mockReset()` before setting up the single-from-call path. Without the reset, the `mockReturnValueOnce` queued by `setupHappyPath()` in `beforeEach` gets consumed by the checkpoint_grades INSERT instead of the (skipped) rubrics SELECT, causing the insert to receive the wrong mock chain and return 500.
+
+---
+
 ### Architecture Decisions (V2.0 additions)
 
 - **pgvector** enabled via `CREATE EXTENSION IF NOT EXISTS vector` in migration 003
 - **HNSW index** used for vector similarity (cosine ops) — requires pgvector ≥ 0.5 (Supabase provides 0.7+)
 - **Dependency injection pattern** for embedding script — supabase and openai clients are passed as params, enabling clean unit tests without jest.mock at module level
 - **source_type UNIQUE constraint** on embedding_store — each DB record has at most one embedding; re-running the script is safe (upsert overwrites stale vectors)
+- **Query cache singleton** — `queryCache` in `lib/narrvoca/query-cache.ts` is shared across all API route invocations in the same Node.js process; TTL-based so content changes are reflected within 5 minutes without a restart
+
+---
+
+## NarrVoca 2.0 — FINAL STATUS (COMPLETE ✓)
+
+| Version | Description | Tests | Status |
+|---|---|---|---|
+| V2.1 | RAG Foundation — pgvector + 6 tables + embedding generation script | 65 | **COMPLETE ✓** |
+| V2.2 | Retrieval Layer — `retrieveChunks`, `match_embeddings` SQL fn, log/cache APIs | 57 | **COMPLETE ✓** |
+| V2.3 | AI Tutor — `tutor-chat`, `tutor-sessions`, `useTutorChat`, chat panel UI | 108 | **COMPLETE ✓** |
+| V2.4 | Smart Grading — `grading-rubrics`, `smart-grade`, RAG-grounded rubric eval, score badge | 286 | **COMPLETE ✓** |
+| V2.5 | Polish and Scale — auto-embed pipeline, RAG SRS vocab review, query cache | +54 | **COMPLETE ✓** |
+
+**25 suites · 340 tests · 340 passing · main branch · NarrVoca 2.0 COMPLETE**
