@@ -19,6 +19,7 @@ export function useNarrativeReader() {
   const [nodeIndex, setNodeIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [gradeScore, setGradeScore] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -53,6 +54,7 @@ export function useNarrativeReader() {
     setNodeIndex(0);
     setUserInput('');
     setFeedback(null);
+    setGradeScore(null);
     try {
       const full = await getFullStory(storyId);
       setFullStory(full);
@@ -71,6 +73,7 @@ export function useNarrativeReader() {
   async function handleContinue() {
     if (!fullStory || !currentNode || !uid) return;
     setFeedback(null);
+    setGradeScore(null);
 
     await fetch('/api/narrvoca/update-progress', {
       method: 'POST',
@@ -86,15 +89,17 @@ export function useNarrativeReader() {
     if (!fullStory || !currentNode || !uid || !userInput.trim()) return;
     setIsSubmitting(true);
     setFeedback(null);
+    setGradeScore(null);
 
-    // Step 1: Grade the response with the real LLM
+    // Step 1: Smart-grade — RAG-grounded grading with rubric criteria
     let accuracy_score = 0.5;
     let llm_feedback: string | null = null;
 
-    const gradeRes = await fetch('/api/narrvoca/grade-response', {
+    const gradeRes = await fetch('/api/narrvoca/smart-grade', {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({
+        uid,
         node_id: currentNode.node_id,
         user_input: userInput,
         target_language: fullStory.story.target_language,
@@ -106,6 +111,7 @@ export function useNarrativeReader() {
       llm_feedback = gradeData.feedback ?? null;
     }
 
+    setGradeScore(accuracy_score);
     setFeedback(llm_feedback);
 
     // Step 2: Log the interaction with the real score
@@ -174,6 +180,7 @@ export function useNarrativeReader() {
     setNodeIndex(0);
     setUserInput('');
     setFeedback(null);
+    setGradeScore(null);
     setIsComplete(false);
   }
 
@@ -188,6 +195,7 @@ export function useNarrativeReader() {
     userInput,
     setUserInput,
     feedback,
+    gradeScore,
     isLoading,
     isSubmitting,
     isComplete,
