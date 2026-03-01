@@ -250,6 +250,12 @@ Full documentation at [`docs/api-reference.md`](docs/api-reference.md).
 
 ---
 
+## Personal Development
+
+NarrVoca 1.0 was built as a team capstone project for CSCI 6333 at UTRGV Spring 2026. Subsequent versions (2.0+) were developed independently by Ruben Aleman.
+
+---
+
 ## License
 
 Academic project — CSCI 6333, University of Texas Rio Grande Valley, Spring 2026.

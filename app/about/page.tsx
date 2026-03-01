@@ -57,21 +57,39 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">Developer</h2>
-            <a
-              href="https://github.com/BUDDY26"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
-            >
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
-                <VocoraMascot width={32} height={32} />
+            <h2 className="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-3">Developers</h2>
+            <div className="flex flex-col gap-3">
+              <a
+                href="https://github.com/BUDDY26"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-colors"
+              >
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <VocoraMascot width={32} height={32} />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-100">Ruben Aleman</p>
+                  <p className="text-sm text-purple-500 dark:text-purple-400">@BUDDY26 on GitHub</p>
+                </div>
+              </a>
+              <div className="inline-flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <VocoraMascot width={32} height={32} />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-100">Sylvia Ozuna</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-slate-800 dark:text-slate-100">Ruben Aleman</p>
-                <p className="text-sm text-purple-500 dark:text-purple-400">@BUDDY26 on GitHub</p>
+              <div className="inline-flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-5 border border-purple-100 dark:border-purple-800">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <VocoraMascot width={32} height={32} />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-100">Andrea Garza</p>
+                </div>
               </div>
-            </a>
+            </div>
           </section>
 
           <section>
