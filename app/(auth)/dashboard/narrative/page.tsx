@@ -35,6 +35,7 @@ export default function NarrativePage() {
     userInput,
     setUserInput,
     feedback,
+    gradeScore,
     isLoading,
     isSubmitting,
     isComplete,
@@ -284,9 +285,27 @@ export default function NarrativePage() {
                       {isSubmitting ? 'Checking…' : 'Submit response'}
                     </Button>
 
-                    {/* LLM feedback card — shown after submission, cleared on advance */}
+                    {/* Grade feedback card — score badge + explanation */}
                     {feedback && (
-                      <div className="rounded-lg bg-purple-50 border border-purple-200 dark:bg-purple-950 dark:border-purple-700 px-4 py-3">
+                      <div className="rounded-lg bg-purple-50 border border-purple-200 dark:bg-purple-950 dark:border-purple-700 px-4 py-3 space-y-2">
+                        {gradeScore !== null && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              Score
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                gradeScore >= 0.7
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                  : gradeScore >= 0.4
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }`}
+                            >
+                              {Math.round(gradeScore * 100)}%
+                            </span>
+                          </div>
+                        )}
                         <p className="text-sm italic text-purple-700 dark:text-purple-300">
                           {feedback}
                         </p>

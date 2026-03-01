@@ -237,15 +237,22 @@ describe('handleSubmit', () => {
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(callsBefore);
   });
 
-  it('calls grade-response API before logging the interaction', async () => {
+  it('calls smart-grade API before logging the interaction', async () => {
     const result = await mountAtCheckpoint();
     mockResolveBranch.mockResolvedValue(12);
     await act(async () => { await result.current.handleSubmit(); });
     const calls = (global.fetch as jest.Mock).mock.calls.map((c: unknown[]) => c[0]);
-    const gradeIdx = calls.findIndex((url: unknown) => url === '/api/narrvoca/grade-response');
+    const gradeIdx = calls.findIndex((url: unknown) => url === '/api/narrvoca/smart-grade');
     const logIdx = calls.findIndex((url: unknown) => url === '/api/narrvoca/log-interaction');
     expect(gradeIdx).toBeGreaterThanOrEqual(0);
     expect(gradeIdx).toBeLessThan(logIdx);
+  });
+
+  it('exposes gradeScore from the smart-grade response', async () => {
+    const result = await mountAtCheckpoint();
+    mockResolveBranch.mockResolvedValue(12);
+    await act(async () => { await result.current.handleSubmit(); });
+    expect(result.current.gradeScore).toBe(0.8);
   });
 
   it('exposes feedback from the LLM response', async () => {
