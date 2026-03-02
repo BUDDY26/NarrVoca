@@ -1,7 +1,6 @@
 "use client";
 import type React from "react"
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,12 +94,15 @@ export default function SignUpPage() {
   const { language } = useLanguage(); // Get current language from context
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [success, setSuccess] = useState(false);
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_NEXTAUTH_URL ?? 'https://narrvoca.com';
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(false);
 
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -110,7 +112,7 @@ export default function SignUpPage() {
     const password = formData.get('password') as string;
 
     try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -119,12 +121,12 @@ export default function SignUpPage() {
             last_name: lastName,
             display_name: `${firstName} ${lastName}`,
           },
+          redirectTo: `${siteUrl}/auth/callback`,
         },
       });
       if (signUpError) throw new Error(signUpError.message);
 
-      alert("Please verify your email!")
-      router.push(`/login`);
+      setSuccess(true);
     } catch (error) {
       setError(error instanceof Error ? error.message : signupTranslations[language].unexpectedError);
     } finally {
@@ -135,17 +137,16 @@ export default function SignUpPage() {
   async function handleGoogleSignUp() {
     setIsLoading(true);
     setError(null);
-    
+
     const googleLanguage = language === "es" ? "es-419" : language;
-    const redirectURL = `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/dashboard?lang=${language}`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: redirectURL,
+        redirectTo: `${siteUrl}/auth/callback`,
         queryParams: {
           hl: googleLanguage,
-        }
+        },
       },
     });
 
@@ -176,6 +177,16 @@ export default function SignUpPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                  {error && (
+                    <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                      {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="mb-4 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
+                      Please check your email to verify your account.
+                    </div>
+                  )}
                   <SignUpForm isLoading={isLoading} onSubmit={onSubmit} />
                   <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
