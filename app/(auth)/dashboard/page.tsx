@@ -57,6 +57,11 @@ function DashboardPage() {
   const [showTranslation, setShowTranslation] = useState(false);
   const [showSavedTranslation, setShowSavedTranslation] = useState(false);
 
+  // Detect implicit-flow hash token and store session before auth check runs
+  useEffect(() => {
+    supabase.auth.getSession();
+  }, []);
+
   // Check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
