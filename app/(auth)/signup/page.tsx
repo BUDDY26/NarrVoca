@@ -121,7 +121,7 @@ export default function SignUpPage() {
             last_name: lastName,
             display_name: `${firstName} ${lastName}`,
           },
-          redirectTo: `${siteUrl}/auth/callback`,
+          redirectTo: `${siteUrl}/auth/callback?lang=en`,
         },
       });
       if (signUpError) throw new Error(signUpError.message);
@@ -143,7 +143,7 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${siteUrl}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback?lang=en`,
         queryParams: {
           hl: googleLanguage,
         },
