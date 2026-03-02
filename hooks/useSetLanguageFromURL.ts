@@ -7,7 +7,8 @@ export function useSetLanguageFromURL() {
   const { language, setLanguage } = useLanguage();
   const searchParams = useSearchParams();
   const langFromURL = searchParams?.get("lang");
-  const [languageReady, setLanguageReady] = useState(false);
+  // If no ?lang= param, language is already ready (no URL override needed).
+  const [languageReady, setLanguageReady] = useState(!langFromURL);
 
   // If language is in URL, update the language context.
   useEffect(() => {
@@ -18,6 +19,10 @@ export function useSetLanguageFromURL() {
 
   // Markes language as "ready" once language matches URL.
   useEffect(() => {
+    if (!langFromURL) {
+      setLanguageReady(true);
+      return;
+    }
     if (langFromURL && language === langFromURL) {
       setLanguageReady(true);
     }

@@ -32,7 +32,7 @@ export default function AuthCallbackPage() {
         }
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard?lang=en");
     }
 
     handleCallback();
