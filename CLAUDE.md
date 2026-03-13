@@ -1,5 +1,37 @@
 # NarrVoca — Claude Code Instructions
 
+## Project Overview
+
+NarrVoca is a hybrid Next.js 14 application implementing narrative-driven language learning.
+
+Core system features:
+
+• Narrative Reader — branching story engine with score-based progression  
+• AI grading of responses using OpenAI  
+• Spaced-repetition vocabulary mastery system  
+• Retrieval-augmented tutor chat using pgvector embeddings  
+
+Architecture highlights:
+
+• **Hybrid routing**
+  - `app/` → App Router (UI pages)
+  - `src/pages/api/` → Pages Router (all API routes)
+
+• **Supabase**
+  - authentication
+  - relational database
+  - pgvector embeddings
+
+• **AI services**
+  - OpenAI → grading + embeddings
+  - Gemini → tutor chat
+  - Fireworks → image generation
+
+Testing baseline:
+
+25 suites · 340 tests · all must pass before commits.
+
+
 ## Project Identity
 
 **NarrVoca** — narrative-driven vocabulary acquisition (Spanish / Mandarin).
