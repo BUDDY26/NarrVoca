@@ -36,8 +36,8 @@ next-env.d.ts
 # cypress
 cypress.config.ts
 
-# claude code local settings
-.claude/
+# claude code local settings — tracked intentionally (no secrets in .claude/)
+# settings.local.json contains only Bash allow-list rules, not secrets
 
 # OS artefacts
 .DS_Store
