@@ -56,7 +56,6 @@ NarrVoca extends the original Vocora platform (Next.js + Supabase + AI) by intro
 | Deployment | Vercel |
 
 ---
-
 ## Database Schema
 
 NarrVoca adds **11 tables** on top of Vocora's original 5.
