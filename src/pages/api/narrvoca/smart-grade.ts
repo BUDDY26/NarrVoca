@@ -112,6 +112,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         : {};
 
     // Step 5 — Store grade in checkpoint_grades
+    const { count } = await supabase
+      .from('checkpoint_grades')
+      .select('*', { count: 'exact', head: true })
+      .eq('uid', uid)
+      .eq('node_id', node_id);
+
+    const attemptNumber = (count ?? 0) + 1;
+
     const { data: gradeData, error: gradeError } = await supabase
       .from('checkpoint_grades')
       .insert({
@@ -121,6 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         rubric_scores,
         overall_score: accuracy_score,
         feedback,
+        attempt_number: attemptNumber,
       })
       .select('grade_id')
       .single();
