@@ -68,6 +68,12 @@ function setupNewSession() {
   // Reset any accumulated mockReturnValueOnce items from prior tests
   mockFrom.mockReset();
 
+  // First from() — select-before-insert check: select().eq().eq().maybeSingle()
+  const mockMaybeSingleCheck = jest.fn().mockResolvedValue({ data: null, error: null });
+  const mockEqCheckInner = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingleCheck });
+  const mockEqCheckOuter = jest.fn().mockReturnValue({ eq: mockEqCheckInner });
+  const mockSelectCheck = jest.fn().mockReturnValue({ eq: mockEqCheckOuter });
+
   const mockSingleCreate = jest.fn().mockResolvedValue({ data: { session_id: 99 }, error: null });
   const mockSelectCreate = jest.fn().mockReturnValue({ single: mockSingleCreate });
   const mockInsert = jest.fn().mockReturnValue({ select: mockSelectCreate });
@@ -76,8 +82,9 @@ function setupNewSession() {
   const mockUpdate = jest.fn().mockReturnValue({ eq: mockEqUpdate });
 
   mockFrom
-    .mockReturnValueOnce({ insert: mockInsert })  // first from() — session create
-    .mockReturnValue({ update: mockUpdate });      // subsequent from() — session update
+    .mockReturnValueOnce({ select: mockSelectCheck })  // first from() — existence check
+    .mockReturnValueOnce({ insert: mockInsert })        // second from() — session create
+    .mockReturnValue({ update: mockUpdate });            // subsequent from() — session update
 }
 
 // Wire Supabase chains for fetching an existing session (session_id provided)

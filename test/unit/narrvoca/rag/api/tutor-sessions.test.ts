@@ -57,10 +57,19 @@ function setupSelectByUidStoryId(data: unknown, error: unknown = null) {
 
 // Wire: insert({}).select('session_id').single()
 function setupInsert(data: unknown, error: unknown = null) {
+  // First from() — select-before-insert check: select().eq().eq().maybeSingle()
+  const mockMaybeSingleCheck = jest.fn().mockResolvedValue({ data: null, error: null });
+  const mockEqCheckInner = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingleCheck });
+  const mockEqCheckOuter = jest.fn().mockReturnValue({ eq: mockEqCheckInner });
+  const mockSelectCheck = jest.fn().mockReturnValue({ eq: mockEqCheckOuter });
+
   const mockSingle = jest.fn().mockResolvedValue({ data, error });
   const mockSelectAfterInsert = jest.fn().mockReturnValue({ single: mockSingle });
   const mockInsert = jest.fn().mockReturnValue({ select: mockSelectAfterInsert });
-  mockFrom.mockReturnValue({ insert: mockInsert });
+
+  mockFrom
+    .mockReturnValueOnce({ select: mockSelectCheck })
+    .mockReturnValue({ insert: mockInsert });
 }
 
 const SAMPLE_SESSION = {

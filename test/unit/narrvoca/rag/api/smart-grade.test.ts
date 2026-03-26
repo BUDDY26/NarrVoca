@@ -77,13 +77,19 @@ function setupHappyPath(rubrics = SAMPLE_RUBRICS) {
   const mockEqRubrics = jest.fn().mockResolvedValue({ data: rubrics, error: null });
   const mockSelectRubrics = jest.fn().mockReturnValue({ eq: mockEqRubrics });
 
-  // Second from() — insert grade: insert({}).select('grade_id').single()
+  // Second from() — count existing grades: select('*', {count,head}).eq('uid').eq('node_id')
+  const mockEqCountInner = jest.fn().mockResolvedValue({ count: 0, error: null });
+  const mockEqCountOuter = jest.fn().mockReturnValue({ eq: mockEqCountInner });
+  const mockSelectCount = jest.fn().mockReturnValue({ eq: mockEqCountOuter });
+
+  // Third from() — insert grade: insert({}).select('grade_id').single()
   const mockSingle = jest.fn().mockResolvedValue({ data: { grade_id: 77 }, error: null });
   const mockSelectAfterInsert = jest.fn().mockReturnValue({ single: mockSingle });
   const mockInsert = jest.fn().mockReturnValue({ select: mockSelectAfterInsert });
 
   mockFrom
     .mockReturnValueOnce({ select: mockSelectRubrics })
+    .mockReturnValueOnce({ select: mockSelectCount })
     .mockReturnValue({ insert: mockInsert });
 }
 
@@ -252,12 +258,17 @@ describe('POST /api/narrvoca/smart-grade', () => {
   it('uses cached rubrics and skips the DB fetch when cache is warm', async () => {
     mockCacheGet.mockReturnValue(SAMPLE_RUBRICS); // cache hit
 
-    // Re-setup mockFrom for cache-warm path: only one from() call (checkpoint_grades insert)
+    // Re-setup mockFrom for cache-warm path: count query + insert (rubric fetch skipped)
     mockFrom.mockReset();
     const mockSingle = jest.fn().mockResolvedValue({ data: { grade_id: 77 }, error: null });
     const mockSelectAfterInsert = jest.fn().mockReturnValue({ single: mockSingle });
     const mockInsert = jest.fn().mockReturnValue({ select: mockSelectAfterInsert });
-    mockFrom.mockReturnValue({ insert: mockInsert });
+    const mockEqCountInner = jest.fn().mockResolvedValue({ count: 0, error: null });
+    const mockEqCountOuter = jest.fn().mockReturnValue({ eq: mockEqCountInner });
+    const mockSelectCount = jest.fn().mockReturnValue({ eq: mockEqCountOuter });
+    mockFrom
+      .mockReturnValueOnce({ select: mockSelectCount })
+      .mockReturnValue({ insert: mockInsert });
 
     const req = makeReq('POST', VALID_BODY);
     const res = makeRes();
