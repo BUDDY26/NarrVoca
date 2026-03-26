@@ -58,13 +58,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       sessionId = row.session_id;
       existingMessages = row.messages ?? [];
     } else {
-      const { data, error } = await supabase
+      const { data: existing, error: selectError } = await supabase
         .from('tutor_sessions')
-        .insert({ uid, story_id, messages: [] })
-        .select('session_id')
-        .single();
-      if (error) return res.status(500).json({ error: error.message });
-      sessionId = (data as { session_id: number }).session_id;
+        .select('session_id, messages')
+        .eq('uid', uid)
+        .eq('story_id', story_id)
+        .maybeSingle();
+
+      if (selectError) return res.status(500).json({ error: selectError.message });
+
+      if (existing) {
+        const row = existing as { session_id: number; messages: TutorMessage[] };
+        sessionId = row.session_id;
+        existingMessages = row.messages ?? [];
+      } else {
+        const { data, error } = await supabase
+          .from('tutor_sessions')
+          .insert({ uid, story_id, messages: [] })
+          .select('session_id')
+          .single();
+        if (error) return res.status(500).json({ error: error.message });
+        sessionId = (data as { session_id: number }).session_id;
+      }
     }
 
     // Step 3 — Build system prompt with RAG context

@@ -53,6 +53,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'uid and story_id are required' });
     }
 
+    const { data: existing, error: selectError } = await supabase
+      .from('tutor_sessions')
+      .select('session_id')
+      .eq('uid', uid)
+      .eq('story_id', story_id)
+      .maybeSingle();
+
+    if (selectError) return res.status(500).json({ error: selectError.message });
+
+    if (existing) {
+      return res.status(200).json({ session_id: (existing as { session_id: number }).session_id });
+    }
+
     const { data, error } = await supabase
       .from('tutor_sessions')
       .insert({ uid, story_id, messages: [] })
