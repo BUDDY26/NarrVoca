@@ -1,131 +1,100 @@
-# Skill: documentation
+# Documentation Skill
 
-Guidelines for creating and updating documentation in NarrVoca. Do not modify application code when performing documentation tasks.
+> **Trigger:** "Document [file / module / project]" or "Update the docs"
+> Covers docstrings, README sections, architecture docs, and ADRs.
 
 ---
 
-## Existing Documentation Structure
+## Docstring Standards
 
+### Python
+
+Use Google-style docstrings for all public functions, classes, and modules.
+
+```python
+def function_name(param: type) -> return_type:
+    """One-sentence summary.
+
+    Args:
+        param: Description of the parameter.
+
+    Returns:
+        Description of the return value.
+
+    Raises:
+        ValueError: When and why this is raised.
+    """
 ```
-docs/
-├── architecture.md          ← System architecture, data flow diagrams, layer map
-├── api-reference.md         ← All API routes with method, body, response
-├── progress-log.md          ← Session-by-session development log
-├── tooling.md               ← CI, scripts, Claude Code automation
-├── pull-request-description.md ← Template/record for PRs
-├── NarrVoca_DB_Design_A.pdf ← Original DB design document (do not regenerate)
-├── NarrVoca_Figure1_ER_Diagram.png
-├── NarrVoca_Figure2_Schema_Diagram.png
-├── NarrVoca_PromptLog_PartA.pdf
-└── Final Report.pdf
-```
 
----
+### TypeScript / JavaScript
 
-## Which Document To Update
+Use JSDoc for all exported functions and classes.
 
-| Trigger | Update |
-|---|---|
-| New API route added | `docs/api-reference.md` |
-| New table or migration applied | `docs/architecture.md` (layer map, ER relationships) |
-| New lib function or hook | `docs/architecture.md` (layer map) |
-| New session of significant work | `docs/progress-log.md` |
-| New tooling or CI change | `docs/tooling.md` |
-| New env var required | `.env.local.example` + README.md env table |
-| Major architectural decision made | `docs/architecture.md` + `CLAUDE.md` |
-| Migration status changes | `CLAUDE.md` (migration status table) |
-
----
-
-## API Reference Format
-
-When documenting a new NarrVoca API route, use this format:
-
-```markdown
-### `POST /api/narrvoca/<route-name>`
-
-**Auth:** `Authorization: Bearer <supabase-jwt>` required.
-
-**Body:**
-| Field | Type | Description |
-|---|---|---|
-| `field_name` | `type` | Description |
-
-**Response:**
-| Field | Type | Description |
-|---|---|---|
-| `field_name` | `type` | Description |
-
-**Errors:**
-| Status | Condition |
-|---|---|
-| 401 | Missing or invalid token |
-| 400 | Missing required fields |
-| 500 | DB or AI service error |
+```typescript
+/**
+ * One-sentence summary.
+ *
+ * @param param - Description of the parameter.
+ * @returns Description of the return value.
+ * @throws {Error} When and why this is thrown.
+ */
 ```
 
 ---
 
-## Architecture.md Format
+## README Updates
 
-- Use ASCII flow diagrams (the existing style uses `─`, `│`, `▼`, `├─`, `└─`).
-- Keep the layer map table current — add new rows for new lib files.
-- Add new FK relationships to the "Key Relationships" section when new migrations are applied.
+When updating `README.md`, verify:
 
----
-
-## Progress Log Format
-
-Each session entry:
-
-```markdown
-## Session N — YYYY-MM-DD
-
-### What Was Accomplished
-- Bullet list of completed work, grouped by phase or feature
-
-### Files Changed
-| File | Change |
-|---|---|
-| `path/to/file.ts` | Short description |
-
-### Tests
-N suites · N tests · N passing
-
-### Next Steps (if session is paused)
-- What remains
-```
+- The Overview section matches current functionality
+- All Getting Started commands work from a clean environment
+- The Repository Structure tree reflects the actual directory layout
+- Removed features are removed from the Features list
+- Prerequisites list current versions and tools
 
 ---
 
-## README.md
+## Architecture Documentation
 
-The README contains:
-- Feature table (add rows for major new features)
-- Tech stack table (update if new AI services or libraries are added)
-- DB schema tables (update if new migrations are applied)
-- API reference summary table (keep in sync with `docs/api-reference.md`)
-- Test count (update when suites/count changes significantly)
+When updating `docs/architecture.md`, maintain these sections:
 
-The README is the public-facing document — keep it accurate but do not add implementation details that belong in `docs/architecture.md`.
+1. **System Overview** — what the system does, in one paragraph
+2. **Component Map** — what each major component owns and is responsible for
+3. **Data Flow** — how data moves through the system end-to-end
+4. **Key Interfaces** — the contracts between components
+5. **External Dependencies** — services, libraries, infrastructure
 
----
-
-## CLAUDE.md
-
-Update `CLAUDE.md` when:
-- A migration status changes (applied / pending)
-- A new locked constant is introduced
-- A new protected file or area is identified
-- A new pattern becomes a convention (e.g., a new mock pattern in tests)
-
-Keep `CLAUDE.md` concise — it is loaded into every session context. Do not add prose explanations; prefer tables and bullet points.
+Do not let `docs/architecture.md` drift from the actual implementation. Update it in the same session as any significant structural change.
 
 ---
 
-## What Not To Do
+## Architecture Decision Records (ADRs)
 
-- Do not modify PDF files — they are submitted course deliverables.
-- Do not rename existing doc files — they are referenced in README.md.
-- Do not create a new doc file if an existing one is the right home for the content.
-- Do not duplicate content between `docs/architecture.md` and `docs/api-reference.md`.
+Use ADRs to document significant decisions — library choices, algorithmic approaches, design tradeoffs.
+
+To create a new ADR:
+
+1. Copy `docs/adr/ADR-001-template.md`
+2. Rename to `ADR-NNN-short-title.md` (increment NNN sequentially)
+3. Fill in all sections
+4. Link the new ADR from `docs/architecture.md`
+
+An ADR is required when:
+
+- A library or framework is added or removed
+- An algorithm or approach is chosen over alternatives
+- A significant structural decision is made
+- A past decision is reversed or superseded
+
+---
+
+## Documentation Review Checklist
+
+Before marking documentation complete:
+
+- [ ] All public functions and classes have docstrings
+- [ ] README commands tested and working from a clean environment
+- [ ] `docs/architecture.md` reflects the current implementation
+- [ ] New decisions have ADRs
+- [ ] No unfilled `{{PLACEHOLDER}}` tokens remain in any file
+- [ ] Internal links between docs resolve to real files

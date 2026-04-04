@@ -1,143 +1,145 @@
-# Skill: qa-checklist
+# QA Checklist
 
-A pre-commit / pre-PR quality gate for NarrVoca. Run through every item before marking any task complete. Do not skip items because a change "seems small."
-
----
-
-## Run This Checklist
-
-Work through each section in order. For each item: PASS, FAIL (with detail), or N/A (with reason).
+> **Trigger:** "Run QA" or "Audit the tests"
+> Produces a test coverage and portfolio readiness report.
 
 ---
 
-### 1. Tests
+## QA Agent Role
+
+You are operating as the QA Agent. You do NOT act as a coding agent.
+
+- The QA agent audits, validates, and verifies.
+- The QA agent does NOT implement features, modify application code, redesign architecture, or expand scope.
+- The QA agent and the coding agent must not be combined in the same pass. If implementation is needed, hand off to a coding pass first, then return to QA.
+- Audit first, report findings, recommend fixes. Only apply fixes if explicitly instructed.
+
+---
+
+## Severity Classification
+
+All findings must be classified using this scale:
+
+| Level | Label | Meaning |
+|-------|-------|---------|
+| ✅ | **Passed** | Working correctly — no action needed |
+| ⚠️ | **Minor** | Cosmetic or low-impact issue |
+| ❗ | **Medium** | Affects usability but not blocking |
+| 🚨 | **Major** | Breaks functionality or user experience |
+
+---
+
+## Mandatory QA Workflow
+
+QA is performed AFTER implementation, not during. The required sequence is:
+
+1. **Plan** — define what will be built
+2. **Code** — coding agent implements the plan
+3. **QA Audit** — QA agent audits the result (this skill)
+4. **Fix Pass** — coding agent addresses findings (separate pass)
+5. **QA Verify** — QA agent confirms fixes resolved the issues
+
+Do not skip the verify pass. A fix is not confirmed until QA re-audits it.
+
+---
+
+## Part 1 — Test Coverage Audit
+
+### 1.1 Inventory
+
+List every file in `src/`. For each, identify:
+
+- Whether a unit test exists in `tests/unit/`
+- Whether integration test coverage exists in `tests/integration/`
+- Whether the file is tested at all
+
+Flag any source file with no coverage as **UNCOVERED**.
+
+### 1.2 Test Quality
+
+For each test file, check:
+
+| Check | Pass? |
+|-------|-------|
+| Tests assert specific outcomes, not just absence of errors | |
+| Tests are independent — no shared mutable state between test cases | |
+| Edge cases are covered: empty input, boundary values, error paths | |
+| Test names describe the behavior being verified | |
+| Fixtures are minimal and purposeful | |
+
+### 1.3 Coverage Report
+
+Run the test command from CLAUDE.md Section 3 and capture coverage output. Report:
+
+- Total coverage percentage
+- Files below 80% (flag as **LOW COVERAGE**)
+- Files at 0% (flag as **UNCOVERED**)
+
+---
+
+## Part 2 — Documentation Audit
+
+| Item | Status |
+|------|--------|
+| `README.md` overview matches current implementation | |
+| All README commands tested and working | |
+| `docs/architecture.md` reflects current code structure | |
+| At least one ADR exists in `docs/adr/` | |
+| `docs/qa/qa-plan.md` is filled in | |
+| `docs/runbooks/operations.md` is filled in | |
+| No unfilled `{{PLACEHOLDER}}` tokens in any file | |
+
+---
+
+## Part 3 — Portfolio Readiness Audit
+
+| Criterion | Status |
+|-----------|--------|
+| Project has a clear purpose stated in README | |
+| README explains what problem is solved | |
+| Architecture is documented | |
+| Tests exist and pass | |
+| CI pipeline is green | |
+| No placeholder tokens remain | |
+| No dead code or commented-out blocks | |
+| Commit history is professional (descriptive messages, logical progression) | |
+| No secrets or credentials in any file | |
+| CLAUDE.md Sections 4–9 and 12 are filled in | |
+
+---
+
+## Part 4 — Structure Validation
+
+Run:
 
 ```bash
-npm test
+bash scripts/validate-structure.sh --strict
 ```
 
-- [ ] All tests pass
-- [ ] Suite count has not decreased (baseline: 25 suites)
-- [ ] Test count has not decreased (baseline: 340 tests)
-- [ ] If new routes or lib functions were added, new tests were added too
-
-Fail condition: any test failure, any unexplained suite disappearance.
+All items must pass in portfolio-ready state. Warnings are not acceptable for a submitted portfolio repository.
 
 ---
 
-### 2. TypeScript
-
-```bash
-npx tsc --noEmit
-```
-
-- [ ] Zero type errors
-- [ ] No `@ts-ignore` or `as any` added without a documented reason
-
-Note: `next.config.mjs` suppresses TS errors on `next build` — this check must be done explicitly via `tsc --noEmit`.
-
----
-
-### 3. Auth guards
-
-For every new or modified file in `src/pages/api/narrvoca/`:
-
-- [ ] `Authorization: Bearer <token>` extracted from `req.headers.authorization`
-- [ ] `supabase.auth.getUser(token)` called before any DB operation
-- [ ] `401` returned if `user` is null
-- [ ] No DB reads or writes occur before the auth check
-
----
-
-### 4. Environment variables
-
-- [ ] No new server-only env vars referenced in client-side code
-- [ ] If a new env var was added, `.env.local.example` has been updated with the key (empty value)
-- [ ] If a new env var was added, README.md env table has been updated
-
----
-
-### 5. Migration hygiene
-
-For any new file in `supabase/migrations/`:
-
-- [ ] Matching `_rollback.sql` exists
-- [ ] DDL uses `IF NOT EXISTS` / `IF EXISTS` guards
-- [ ] FKs use `ON DELETE RESTRICT` (or deviation is documented)
-- [ ] CLAUDE.md migration status table updated
-- [ ] Migration has NOT been auto-applied — user was asked first
-
----
-
-### 6. Router placement
-
-- [ ] No new files added under `app/api/`
-- [ ] All new API handlers follow Pages Router pattern (`(req: NextApiRequest, res: NextApiResponse)`)
-
----
-
-### 7. Protected areas
-
-- [ ] `components/ui/` files untouched
-- [ ] `app/(auth)/story-generator/` and `hooks/story-generator/` untouched
-- [ ] `app/(auth)/actions/auth.ts` untouched (unless auth work was explicitly requested)
-- [ ] `app/auth/callback/page.tsx` untouched (unless OAuth work was explicitly requested)
-
----
-
-### 8. Locked constants
-
-Verify these values are unchanged:
-
-- [ ] Branching pass threshold: `0.7`
-- [ ] SRS intervals: <0.3→1d, <0.6→3d, <0.8→7d, ≥0.8→14d
-- [ ] Embedding model: `text-embedding-3-small`
-- [ ] Grading model: `gpt-4o-mini`
-
----
-
-### 9. Dependency injection (lib/ functions)
-
-For any new function in `lib/narrvoca/`:
-
-- [ ] `supabase` and `openai` (if needed) are received as parameters
-- [ ] No direct import-and-call of `supabase` singleton inside the function body
-
----
-
-### 10. Documentation
-
-- [ ] If a new API route was added: `docs/api-reference.md` updated
-- [ ] If a new lib function or hook was added: `docs/architecture.md` layer map updated
-- [ ] If a migration was applied: `CLAUDE.md` migration status updated
-- [ ] If a new env var was added: both `.env.local.example` and README updated
-
----
-
-### 11. Commit hygiene
-
-- [ ] Only the files relevant to the task are staged
-- [ ] No `.env`, `.env.local`, or secret files staged
-- [ ] Commit message describes the "why", not just the "what"
-
----
-
-## Summary Output
+## QA Report Output Format
 
 ```
-## QA Checklist — [date] — [task description]
+## QA Report: [project name] — [date]
 
-1. Tests:       PASS / FAIL
-2. TypeScript:  PASS / FAIL
-3. Auth guards: PASS / N/A
-4. Env vars:    PASS / N/A
-5. Migrations:  PASS / N/A
-6. Router:      PASS / PASS
-7. Protected:   PASS / PASS
-8. Constants:   PASS / PASS
-9. DI pattern:  PASS / N/A
-10. Docs:       PASS / N/A
-11. Commit:     PASS / FAIL
+### Test Coverage
+- Total: [X]%
+- Uncovered files: [list or "None"]
+- Low-coverage files: [list or "None"]
 
-Overall: READY TO COMMIT / BLOCKED (items N, N)
+### Documentation
+[Pass / list of gaps]
+
+### Portfolio Readiness
+[Pass / list of blockers]
+
+### Structure Validation
+[Pass / FAIL with details]
+
+### Recommended Actions
+1. [Highest priority item]
+2. [Next item]
 ```

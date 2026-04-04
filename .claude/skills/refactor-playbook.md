@@ -1,73 +1,96 @@
-# Skill: refactor-playbook
+# Refactor Playbook
 
-A structured approach for any refactoring task in NarrVoca. Refactoring means improving internal structure without changing observable behavior. Follow these steps in order.
-
----
-
-## Before Starting
-
-1. **Confirm scope** — get explicit agreement on which files are in scope. Do not touch files outside that scope.
-2. **Run tests** — `npm test` must be green before any change. If tests are failing, stop and report; do not proceed with refactoring on top of broken tests.
-3. **Note the baseline** — record suite/test counts from the passing run.
+> **Trigger:** "Refactor [component / file / function]"
+> All refactoring follows a proposal-first workflow. No code is changed until a proposal is approved.
 
 ---
 
-## Invariants — Never Break These
+## Rule: Proposal Before Any Change
 
-These must remain unchanged after any refactoring:
+Before writing a single line of changed code:
 
-| Invariant | Location |
-|---|---|
-| Branching pass threshold = `0.7` | `lib/narrvoca/branching.ts`, API routes |
-| SRS intervals (1/3/7/14 days) | `src/pages/api/narrvoca/update-mastery.ts` |
-| Embedding model = `text-embedding-3-small` (1536 dims) | `lib/narrvoca/rag.ts`, `scripts/generate-embeddings.ts` |
-| Grading model = `gpt-4o-mini` | `src/pages/api/narrvoca/smart-grade.ts`, `grade-response.ts` |
-| Auth guard pattern on all narrvoca API routes | `src/pages/api/narrvoca/` |
-| API routes remain under `src/pages/api/` (Pages Router) | — |
-| `lib/narrvoca/` functions accept supabase/openai via DI | — |
+1. Read the target code in full
+2. Read its tests
+3. Read any related section of `docs/architecture.md`
+4. Write a proposal using the template below
+5. Present the proposal and wait for explicit approval
+
+This prevents wasted effort and ensures the user controls all structural decisions.
 
 ---
 
-## Refactoring Patterns for This Codebase
+## Proposal Template
 
-### Extracting a helper from a route handler
-1. Write the helper in `lib/narrvoca/` with supabase/openai as parameters (DI pattern).
-2. Import and call it from the route handler — the handler stays in `src/pages/api/narrvoca/`.
-3. Write a unit test for the helper in `test/unit/narrvoca/`.
-4. Run `npm test` — all 340+ tests must still pass.
+```
+## Refactor Proposal: [component or function name]
 
-### Consolidating duplicate Supabase query logic
-1. Move the query to `lib/narrvoca/queries.ts` as a typed function.
-2. Replace call sites with the new helper.
-3. Update tests in `test/unit/narrvoca/queries.test.ts`.
+### What
+[One sentence describing what will be changed]
 
-### Splitting a large hook
-`useNarrativeReader.ts` is the central state machine — split with extreme caution.
-- Never split auth/accessToken logic from the main hook.
-- Never move API fetch calls out of the hook into components.
-- If splitting, keep the public hook API identical (same returned fields).
+### Why
+[One paragraph explaining the problem with the current code]
 
-### Updating a shared type
-Changes to `lib/narrvoca/types.ts` propagate broadly. After changing an interface:
-1. Run `npx tsc --noEmit` to surface all type errors.
-2. Fix all call sites before committing.
-3. Run `npm test`.
+### How
+[Step-by-step description of the planned changes — no code yet]
+
+### Risks
+- [Risk 1 — what could break]
+- [Risk 2 — what needs re-testing]
+
+### Scope
+Files to be modified:
+- [file 1]
+- [file 2]
+
+Files that must NOT be modified:
+- [file — reason]
+
+### Tests
+[How the refactor will be validated — existing tests, new tests, or both]
+
+### Reversibility
+[How to undo this change if it introduces a regression]
+```
 
 ---
 
-## After Each Change
+## Execution Steps (post-approval only)
 
-- Run `npm test` — must match or exceed baseline pass count.
-- Run `npx tsc --noEmit` — no new type errors.
-- Do not commit if either check fails.
+### Step 1 — Confirm the test suite passes before touching anything
+
+Run the test command from CLAUDE.md Section 3. If it fails, surface the failures to the user before proceeding. Never start a refactor on a broken baseline.
+
+### Step 2 — Make one change at a time
+
+Do not batch unrelated refactors in a single pass. Each discrete change must be small enough to review in isolation and validated by re-running the test suite.
+
+### Step 3 — Keep interfaces stable
+
+Unless the proposal explicitly changes a public API or function signature, external interfaces must remain identical after the refactor.
+
+### Step 4 — Update documentation
+
+After the refactor, update any affected:
+
+- Inline comments and docstrings
+- `docs/architecture.md` if a component's design changed
+- CLAUDE.md Section 7 if new sharp edges were discovered
+
+### Step 5 — Report completion
+
+Produce a brief summary:
+
+- What changed and why
+- Test results before → after
+- Any follow-up tasks identified
 
 ---
 
-## What Not To Do
+## When to Stop and Start Over
 
-- Do not rename exported functions without updating all import sites.
-- Do not change the shape of objects returned from `lib/narrvoca/queries.ts` without updating all consumers and tests.
-- Do not consolidate the two router systems (App Router + Pages Router) — the hybrid is intentional.
-- Do not touch `components/ui/` during a refactor.
-- Do not refactor `app/(auth)/story-generator/` — legacy, hands-off.
-- Do not suppress TypeScript errors with `as any` or `@ts-ignore` as a refactoring shortcut.
+Stop and write a new proposal if:
+
+- The scope grows beyond what was approved
+- A test failure requires structural changes not in the original plan
+- A dependency needs to be added or removed
+- A public API needs to change

@@ -43,6 +43,28 @@ NarrVoca 1.0 (Phases 1–6) is complete. NarrVoca 2.0 (RAG layer, V2.1–V2.5) i
 
 ---
 
+## External Orchestration Boundary
+
+Claude Cowork is the orchestration layer and controls:
+
+- **WHAT** tasks are executed
+- **WHEN** tasks are executed
+- Project selection and workflow state
+
+This repository controls:
+
+- **HOW** tasks are implemented
+- Local architecture, constraints, and rules
+
+Claude must follow:
+
+- Cowork for execution flow and task control
+- Repo CLAUDE.md for implementation constraints
+
+Cowork does NOT override repository implementation rules.
+
+---
+
 ## Test Command
 
 ```bash
@@ -189,3 +211,73 @@ Never auto-run migrations. Always confirm with user before applying SQL to Supab
 - Do not run migration scripts or DB-writing scripts without explicit user approval
 - Do not push to remote or create PRs without explicit user instruction
 - Do not add docstrings or comments to code you did not change
+
+---
+
+<!-- TEMPLATE-MIRROR:SECTION12:START -->
+## 12. Agent Operating Constraints
+
+These are mandatory operating constraints for Claude Code to prevent context loss, silent truncation errors, incorrect edits, incomplete search results, and unsafe multi-file execution. They apply to **all repositories** instantiated from this template.
+
+### 12.1 Dead Code First
+
+Before any structural refactor on large files:
+
+- Remove unused imports, exports, props, and debug logs
+- Perform cleanup as a separate change set
+- Do NOT combine cleanup and refactor in the same pass
+
+### 12.2 Batched Execution
+
+For tasks touching multiple files:
+
+- Break work into small batches (max ~5 files per batch)
+- Complete and verify each batch before continuing
+- State the batch plan before starting so the user can confirm grouping
+
+### 12.3 Context Decay Awareness
+
+- Do NOT rely on memory of file contents after long conversations
+- Re-read files before editing when uncertain
+- If context compaction may have fired, say so explicitly
+
+### 12.4 File Read Limits
+
+- Large files may be silently truncated when read
+- Read files in chunks when necessary (state chunk boundaries explicitly)
+- Never assume full file visibility from a single read
+
+### 12.5 Tool Result Awareness
+
+- Search results may be incomplete due to truncation
+- Re-run searches with narrower scope if results look suspiciously small
+- Never treat a small result set as definitively complete without scoped verification
+
+### 12.6 Edit Integrity
+
+For every edit:
+
+1. Read the file immediately before editing
+2. Apply the change
+3. Re-read the file after editing to confirm the change applied correctly
+
+If a re-read reveals the edit did not apply, diagnose the mismatch before retrying.
+
+### 12.7 No Semantic Assumptions
+
+- Search tools perform text matching only — not semantic code understanding
+- Do NOT assume a single search caught all references
+- On any rename, signature change, or symbol deletion: check direct calls, type references, string literals, dynamic imports, re-exports, test files, and config files separately
+
+### 12.8 Rule Suspension
+
+If the user explicitly states **"suspend rule X for this session"**, that rule is temporarily inactive until the user says **"restore rules"** or a new session begins. Rules may only be suspended by the user — do not self-suspend a rule because it is inconvenient.
+
+<!-- TEMPLATE-MIRROR:SECTION12:END -->
+
+---
+
+<!-- TEMPLATE-MIRROR:FOOTER:START -->
+*Last updated by Claude: `2026-04-01`*
+*Entry protocol completed: `no`*
+<!-- TEMPLATE-MIRROR:FOOTER:END -->

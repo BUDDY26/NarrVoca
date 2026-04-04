@@ -1,97 +1,92 @@
-# Skill: code-review
+# Code Review Skill
 
-Review staged or specified changes for correctness, security, and consistency with NarrVoca conventions. Do not modify any code. Output a structured review report.
-
----
-
-## Invocation
-
-If the user specifies files or a diff, review those. Otherwise review all staged changes via `git diff --cached` and unstaged changes via `git diff`.
+> **Trigger:** "Review [file / PR / change]"
+> Produces a structured, severity-labeled review report.
 
 ---
 
-## Review Checklist
+## Severity Labels
 
-### Auth guard (API routes only)
-Every handler in `src/pages/api/narrvoca/` must:
-- Extract `Authorization: Bearer <token>` from `req.headers.authorization`
-- Call `supabase.auth.getUser(token)` and return `401` if `user` is null
-- Perform no DB operations before the auth check passes
+| Label | Meaning |
+|-------|---------|
+| **BLOCKER** | Must fix before merge — correctness, security, or data integrity issue |
+| **MAJOR** | Should fix — design flaw, significant performance problem, or confusing logic |
+| **MINOR** | Nice to fix — style, naming, or small inefficiency |
+| **NOTE** | Observation only — no action required |
 
-Flag any route missing this guard. Flag any route that reads `req.body` before verifying auth.
+---
 
-### Router placement
-- API handlers belong in `src/pages/api/` — Pages Router pattern with `(req, res)` signature
-- Page components belong in `app/` — App Router pattern
-- Flag any new file in `app/api/` or any RSC being used as an API handler
+## Review Procedure
 
-### Dependency injection (lib/ functions)
-New functions in `lib/narrvoca/` must accept `supabase` and `openai` as parameters — no module-level singleton calls inside library functions. Flag any function that imports and calls `supabase` directly at the top level of a lib file rather than receiving it as a parameter.
+### Step 1 — Understand the change
 
-### Environment variable access
-- Server-only keys (`OPENAI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, etc.) must never appear in client-side code (`'use client'` components, hooks, or files under `app/` that are not Server Components).
-- `NEXT_PUBLIC_` variables are intentionally public — no flag needed.
-- Flag any non-public env var referenced in a client-side file.
+Before reviewing, read:
 
-### Locked constants
-These values must not change without explicit instruction:
-- Branching pass threshold: `0.7`
-- SRS intervals: <0.3→1d, <0.6→3d, <0.8→7d, ≥0.8→14d
-- Embedding model: `text-embedding-3-small` (1536 dims)
-- Grading model: `gpt-4o-mini`
+1. The file(s) being reviewed in full
+2. Any related test files
+3. The relevant section of `docs/architecture.md` if the change touches a core component
 
-Flag any change to these values.
+### Step 2 — Check correctness
 
-### Migration safety
-- New SQL in `supabase/migrations/` must have a matching `_rollback.sql`
-- DDL must use `IF NOT EXISTS` / `IF EXISTS` guards
-- FKs should use `ON DELETE RESTRICT` unless there is a documented reason otherwise
-- Flag any migration without a rollback file
+- Does the code do what it claims to do?
+- Are edge cases handled (empty input, null, zero, boundary values)?
+- Are errors raised or returned at the right boundaries?
+- Are there off-by-one errors, race conditions, or unhandled exceptions?
 
-### Test coverage
-- New API routes should have a corresponding test suite in `test/unit/narrvoca/api/`
-- New lib functions should have tests in `test/unit/narrvoca/`
-- New hooks should have tests in `test/unit/narrvoca/`
-- Flag any new public function or route with no corresponding test file
+### Step 3 — Check security
 
-### components/ui/ guard
-Flag any hand-edits to files under `components/ui/` — these are shadcn/ui primitives and should never be modified manually.
+- Is user input validated at system boundaries?
+- Are secrets handled through environment variables, never hardcoded?
+- Is there potential for SQL injection, XSS, or command injection?
+- Does the code follow the principle of least privilege?
 
-### story-generator guard
-Flag any changes to `app/(auth)/story-generator/`, `hooks/story-generator/`, or related components — this is the legacy Vocora feature, preserved as-is.
+### Step 4 — Check tests
+
+- Is there a test for the new behavior?
+- Do tests assert outcomes, not just that code runs without error?
+- Are edge cases tested?
+- Are tests independent (no shared mutable state)?
+
+### Step 5 — Check readability
+
+- Are names descriptive and consistent with the surrounding codebase?
+- Is the logic self-evident, or does it need a comment?
+- Is each function doing one thing?
+- Is there dead code or commented-out code to remove?
 
 ---
 
 ## Output Format
 
 ```
-## Code Review — [date]
-
-### Auth guards
-[PASS / FLAG: description]
-
-### Router placement
-[PASS / FLAG: description]
-
-### Dependency injection
-[PASS / FLAG: description]
-
-### Environment variable access
-[PASS / FLAG: description]
-
-### Locked constants
-[PASS / FLAG: description]
-
-### Migration safety
-[PASS / FLAG: description]
-
-### Test coverage
-[PASS / FLAG: description]
-
-### Protected area guards
-[PASS / FLAG: description]
+## Code Review: [filename or description]
 
 ### Summary
-[Overall: PASS / NEEDS ATTENTION]
-[List of flags, if any]
+[2–3 sentence overall assessment]
+
+### Findings
+
+**[BLOCKER]** [location] — [description]
+**[MAJOR]**   [location] — [description]
+**[MINOR]**   [location] — [description]
+**[NOTE]**    [location] — [description]
+
+### Verdict
+APPROVE | REQUEST CHANGES | DISCUSS
+[One sentence justifying the verdict]
 ```
+
+If there are no findings at a given severity level, omit that section.
+
+---
+
+## Quick Checklist
+
+- [ ] Correctness verified
+- [ ] Security checked
+- [ ] Tests present and meaningful
+- [ ] No hardcoded secrets
+- [ ] No dead code
+- [ ] Names are clear and consistent
+- [ ] Errors handled at system boundaries
+- [ ] CLAUDE.md permission rules respected

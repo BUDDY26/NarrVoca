@@ -1,56 +1,107 @@
-# Skill: entry-protocol
+# Entry Protocol
 
-Perform a structured repository entry scan at the start of a new session or when re-orienting after a long break. Do not modify any code. Output a structured report only.
+> **Trigger:** Run this at the start of every new session before modifying any code.
+> Say "Run the entry protocol" to invoke.
 
----
-
-## Steps
-
-### 1. Git state
-- Run `git status` and `git log --oneline -10`.
-- Note current branch, any uncommitted changes, and the shape of recent commits.
-- Flag anything unexpected (untracked migration files, staged changes, detached HEAD).
-
-### 2. Test suite health
-- Run `npm test -- --passWithNoTests 2>&1 | tail -20` to confirm suite count and pass/fail.
-- Report: suites, tests, pass count. Flag any failures immediately.
-- Expected baseline: 25 suites · 340 tests · 340 passing.
-
-### 3. Router split integrity check
-- Confirm API routes exist only under `src/pages/api/` — not under `app/api/`.
-- Confirm `app/(auth)/dashboard/narrative/page.tsx` exists (primary reader page).
-- Confirm `app/(auth)/story-generator/` is untouched (legacy Vocora feature — hands-off).
-
-### 4. Migration status check
-- List all files under `supabase/migrations/`.
-- Cross-reference against the known applied/pending table in CLAUDE.md.
-- Flag any migration files that are present but not reflected in CLAUDE.md.
-- Note: `004_match_embeddings_fn.sql` is a known pending migration — it is intentional, not a bug.
-
-### 5. Environment template check
-- Confirm `.env.local.example` is present and reflects all keys in use.
-- Do NOT read or output the contents of `.env`, `.env.local`, or any real secret file.
-
-### 6. Protected files presence check
-Confirm these files exist (do not read contents unless the task requires it):
-- `lib/supabase.ts`
-- `lib/narrvoca/types.ts`
-- `lib/narrvoca/queries.ts`
-- `hooks/narrvoca/useNarrativeReader.ts`
-- `src/pages/api/narrvoca/smart-grade.ts`
-
-### 7. Summary report
-Output the following sections:
-- **Git state**: branch, clean/dirty, last commit
-- **Test suite**: pass/fail counts
-- **Open tasks from MEMORY.md**: list any items marked as not yet applied or not yet done
-- **Flags**: anything unexpected found in steps 1–6
-- **Ready to proceed**: yes/no, and why if no
+This is a nine-phase read-only scan. Do not write, edit, or propose code changes until Phase 9 is complete.
 
 ---
 
-## What Not To Do
-- Do not run the dev server.
-- Do not run migration scripts.
-- Do not run embedding or seed scripts.
-- Do not modify any file.
+## Phase 1 — Read CLAUDE.md
+
+Read `CLAUDE.md` in full. Extract:
+
+- Project name, purpose, and status (Section 1)
+- Permitted and forbidden actions (Section 3)
+- Active hooks (Section 9)
+- Known sharp edges (Section 7)
+- Agent operating constraints (Section 12)
+
+Confirm: "CLAUDE.md read. Rules loaded."
+
+---
+
+## Phase 2 — Check Bootstrap Status
+
+Check for `.bootstrap-complete`. If absent, warn:
+
+> Bootstrap has not been run. Run `bash scripts/bootstrap.sh` before proceeding.
+
+If present, read and summarize when bootstrap was run and for which project.
+
+---
+
+## Phase 3 — Validate Repository Structure
+
+Run:
+
+```bash
+bash scripts/validate-structure.sh
+```
+
+Summarize failures and warnings. Do not proceed past Phase 3 if there are hard failures — surface them to the user first.
+
+---
+
+## Phase 4 — Inventory Source Files
+
+List all files in `src/`. For each file, note:
+
+- File name and approximate purpose (from name and a quick read)
+- Whether a corresponding test file exists in `tests/`
+
+---
+
+## Phase 5 — Inventory Test Files
+
+List all files in `tests/unit/` and `tests/integration/`. For each:
+
+- Note what module it tests
+- Flag any source files in `src/` with no test coverage
+
+---
+
+## Phase 6 — Read Documentation
+
+Skim the following in order:
+
+1. `docs/architecture.md` — understand the system design
+2. `docs/adr/` — identify all recorded decisions
+3. `docs/qa/qa-plan.md` — understand test strategy
+
+Note any documentation that is incomplete or references unfilled placeholders.
+
+---
+
+## Phase 7 — Identify Unfilled Placeholders
+
+Scan all `.md`, `.yml`, `.sh` files for remaining `{{PLACEHOLDER}}` tokens.
+List any found. If none, confirm: "No unfilled placeholders."
+
+---
+
+## Phase 8 — Build Session Summary
+
+Write a brief summary (5–10 lines) covering:
+
+- What this project does
+- Current implementation status
+- Test coverage state
+- Documentation state
+- Any blockers or urgent issues
+
+---
+
+## Phase 9 — Propose Prioritized Work Items
+
+Produce a numbered list of suggested work items in priority order. For each:
+
+- One-sentence description
+- Estimated effort: Low / Medium / High
+- Which CLAUDE.md permission tier applies (allowed / requires approval / forbidden)
+
+Do not begin any work. Present the list and wait for the user to select an item.
+
+---
+
+*Entry protocol complete. Await user instruction.*
