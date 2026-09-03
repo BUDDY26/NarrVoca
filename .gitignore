@@ -47,3 +47,8 @@ cypress.config.ts
 
 # Private keys
 *.pem
+
+# local-only notes (not committed)
+notes/
+# Claude Code machine-local permissions
+.claude/settings.local.json
